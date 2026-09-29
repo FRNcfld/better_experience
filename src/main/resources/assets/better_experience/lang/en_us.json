@@ -1,0 +1,15 @@
+{
+    "key.categories.better_experience": "Better Experience",
+    "key.better_experience.double_jump_toggle": "Toggle Double Jump",
+    "key.better_experience.elytra_flight_toggle": "Toggle Elytra Flight",
+    "message.better_experience.cleanup_warning": "Dropped items will be cleaned up in %s second(s).",
+    "message.better_experience.cleanup_result": "Cleaned up %1$s dropped item(s) in %2$s second(s).",
+    "message.better_experience.double_jump.enabled": "Double jump enabled",
+    "message.better_experience.double_jump.disabled": "Double jump disabled",
+    "message.better_experience.elytra_flight.enabled": "Elytra flight enabled",
+    "message.better_experience.elytra_flight.disabled": "Elytra flight disabled",
+    "advancements.better_experience.getega.title": "Notch Apple",
+    "advancements.better_experience.getega.description": "Obtain an Enchanted Golden Apple",
+    "advancements.better_experience.use_ega.title": "Reign Supreme in the World",
+    "advancements.better_experience.use_ega.description": "Eat an Enchanted Golden Apple"
+}

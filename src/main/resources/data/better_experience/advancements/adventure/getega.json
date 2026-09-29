@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "get_golden_apple": {
+      "conditions": {
+        "items": [
+          {
+            "items": ["minecraft:enchanted_golden_apple"]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.better_experience.getega.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "item": "minecraft:enchanted_golden_apple"
+    },
+    "title": {
+      "translate": "advancements.better_experience.getega.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_golden_apple"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,44 @@
+# ===== 构建产物 =====
+build/
+out/
+classes/
+
+# ===== Gradle =====
+.gradle/
+.gradlehome/
+
+# ===== 开发环境运行目录 =====
+run/
+run-data/
+logs/
+
+# ===== IDE =====
+.idea/
+*.iml
+*.ipr
+*.iws
+.eclipse/
+.settings/
+.classpath
+.project
+
+# ===== 编译产物 =====
+*.class
+*.ctxt
+.mtj.tmp/
+
+# ===== 压缩包 / 打包产物 =====
+# 注意：不要忽略 *.jar 全局，否则会连带排除 gradle/wrapper/gradle-wrapper.jar，
+# 导致干净克隆无法执行 ./gradlew。wrapper jar 必须入库。
+*.war
+*.nar
+*.ear
+*.tar.gz
+*.rar
+
+# ===== 虚拟机崩溃日志 =====
+hs_err_pid*
+replay_pid*
+
+# ===== 代码索引 =====
+.codegraph/
