@@ -110,6 +110,12 @@ repositories {
     // ForgeGradle 已经自带 Forge maven；这里补上 Central，避免部分传递依赖只存在于 Central 时解析失败。
     mavenCentral()
 
+    // Curios API（望远镜饰品栏支持）。可选前置，见下方 dependencies。
+    maven {
+        name = 'Curios'
+        url = 'https://maven.theillusivec4.top/'
+    }
+
     // JEI 等可选前置需要时再打开：
     // maven { name = "Jared's maven"; url = "https://maven.blamejared.com/" }
     // maven { name = "ModMaven"; url = "https://modmaven.dev" }
@@ -122,6 +128,11 @@ dependencies {
 
     // Mixin 注解处理器：生成 refmap（附魔金苹果与鞘翅飞行拦截的目标是原版类，需要 SRG 重映射）
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    // Curios：望远镜可放进饰品栏。**可选前置** —— 只用 compileOnly（编译期）与 runtimeOnly（开发环境运行），
+    // 既不会被打进本 mod 的 jar，也不会成为玩家的必需依赖。未安装时 SpyglassFinder 会退化成背包查找。
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
 
     // 可选前置示例（JEI）：compileOnly 用于编译，runtimeOnly 用于开发环境运行。
     // compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:15.20.0.134")

@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "me.juancarloscp52.spyglass_improvements.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "client": [
+    "AbstractClientPlayerEntityMixin",
+    "CameraTypeMixin",
+    "GameRendererMixin",
+    "InGameHudMixin",
+    "KeyBindingInvoker",
+    "MinecraftClientInvoker",
+    "MinecraftClientMixin",
+    "OptionsScreenMixin",
+    "PlayerEntityMixin"
+  ],
+  "mixins": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "spyglass_improvements-common-common-refmap.json"
+}

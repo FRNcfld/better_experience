@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "me.juancarloscp52.spyglass_improvements.forge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "client": [
+    "MouseMixin"
+  ],
+  "mixins": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "spyglass_improvements-forge-forge-refmap.json"
+}

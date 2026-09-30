@@ -1,0 +1,72 @@
+{
+  "mappings": {
+    "me/juancarloscp52/spyglass_improvements/mixin/AbstractClientPlayerEntityMixin": {
+      "getFieldOfViewModifier": "Lnet/minecraft/client/player/AbstractClientPlayer;m_108565_()F"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/CameraTypeMixin": {
+      "isFirstPerson": "Lnet/minecraft/client/CameraType;m_90612_()Z"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/GameRendererMixin": {
+      "tickFov": "Lnet/minecraft/client/renderer/GameRenderer;m_109156_()V"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/InGameHudMixin": {
+      "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIFFIIII)V": "Lnet/minecraft/client/gui/GuiGraphics;m_280398_(Lnet/minecraft/resources/ResourceLocation;IIIFFIIII)V",
+      "renderCrosshair": "Lnet/minecraft/client/gui/Gui;m_280130_(Lnet/minecraft/client/gui/GuiGraphics;)V",
+      "renderSpyglassOverlay": "Lnet/minecraft/client/gui/Gui;m_280278_(Lnet/minecraft/client/gui/GuiGraphics;F)V"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/KeyBindingInvoker": {
+      "release": "m_90866_()V"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/MinecraftClientInvoker": {
+      "rightClickDelay": "f_91011_:I"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/MinecraftClientMixin": {
+      "Lnet/minecraft/client/KeyMapping;isDown()Z": "Lnet/minecraft/client/KeyMapping;m_90857_()Z",
+      "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V": "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;m_105277_(Lnet/minecraft/world/entity/player/Player;)V",
+      "handleKeybinds": "Lnet/minecraft/client/Minecraft;m_91279_()V"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/OptionsScreenMixin": {
+      "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;": "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;m_264139_(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;",
+      "init": "Lnet/minecraft/client/gui/screens/OptionsScreen;m_7856_()V"
+    },
+    "me/juancarloscp52/spyglass_improvements/mixin/PlayerEntityMixin": {
+      "isScoping": "Lnet/minecraft/world/entity/player/Player;m_150108_()Z"
+    }
+  },
+  "data": {
+    "searge": {
+      "me/juancarloscp52/spyglass_improvements/mixin/AbstractClientPlayerEntityMixin": {
+        "getFieldOfViewModifier": "Lnet/minecraft/client/player/AbstractClientPlayer;m_108565_()F"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/CameraTypeMixin": {
+        "isFirstPerson": "Lnet/minecraft/client/CameraType;m_90612_()Z"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/GameRendererMixin": {
+        "tickFov": "Lnet/minecraft/client/renderer/GameRenderer;m_109156_()V"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/InGameHudMixin": {
+        "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIFFIIII)V": "Lnet/minecraft/client/gui/GuiGraphics;m_280398_(Lnet/minecraft/resources/ResourceLocation;IIIFFIIII)V",
+        "renderCrosshair": "Lnet/minecraft/client/gui/Gui;m_280130_(Lnet/minecraft/client/gui/GuiGraphics;)V",
+        "renderSpyglassOverlay": "Lnet/minecraft/client/gui/Gui;m_280278_(Lnet/minecraft/client/gui/GuiGraphics;F)V"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/KeyBindingInvoker": {
+        "release": "m_90866_()V"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/MinecraftClientInvoker": {
+        "rightClickDelay": "f_91011_:I"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/MinecraftClientMixin": {
+        "Lnet/minecraft/client/KeyMapping;isDown()Z": "Lnet/minecraft/client/KeyMapping;m_90857_()Z",
+        "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V": "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;m_105277_(Lnet/minecraft/world/entity/player/Player;)V",
+        "handleKeybinds": "Lnet/minecraft/client/Minecraft;m_91279_()V"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/OptionsScreenMixin": {
+        "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;": "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;m_264139_(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;",
+        "init": "Lnet/minecraft/client/gui/screens/OptionsScreen;m_7856_()V"
+      },
+      "me/juancarloscp52/spyglass_improvements/mixin/PlayerEntityMixin": {
+        "isScoping": "Lnet/minecraft/world/entity/player/Player;m_150108_()Z"
+      }
+    }
+  }
+}

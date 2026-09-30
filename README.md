@@ -21,6 +21,8 @@
 | **平坦基岩** | 主世界底部与下界顶/底只生成 1 层基岩，取代原版的 1–5 层锯齿状 | 服务端（世界生成） |
 | **亮度扩展** | 亮度（伽马）滑块上限由原版 100% 放宽到 **1000%**；含 Sodium / Embeddium 兼容 | 纯客户端 |
 | **上坡辅助** | 可直接走上整格方块；按键在「关闭 / 上坡 / 自动跳跃」三档间循环，行走·潜行·疾跑三档高度可调 | 纯客户端 |
+| **饱和度机制** | 饱和度不再被饥饿值封顶；饥饿满时进食，多出的营养按比例（默认 1:1，可配）转成饱和度；可无限进食；HUD 显示饱和度与消耗度 | 服务端权威 |
+| **望远镜改进** | 望远镜放在**饰品栏**（Curios，可选）或背包里也能按键使用；滚轮调整放大（默认最大 10 倍，可配）并**记住**设置；开镜时显示准星与放大倍数 | 纯客户端 |
 
 ## 热键
 
@@ -32,12 +34,16 @@
 | 切换鞘翅飞行开关 | 开 / 关自己的鞘翅起飞 |
 | 循环上坡辅助模式 | 关闭 → 上坡 → 自动跳跃 → 关闭 … |
 | 亮度扩展开关 | 开关 1000% 亮度（关闭时按原版亮度渲染） |
+| 使用望远镜 | **按住**即以望远镜视角观察（无需手持，饰品栏/背包里有即可） |
 
 提示统一显示在**动作栏**（物品栏上方），不刷屏聊天栏。
 
 ## 配置
 
-配置文件：`config/better_experience-common.toml`（首次启动后生成）
+配置文件有两份（首次启动后生成）：
+
+- `config/better_experience-common.toml` —— 服务端 / 世界机制（掉落物清理、饱和度、上坡辅助、平坦基岩等）
+- `config/better_experience-client.toml` —— 纯客户端偏好（望远镜的缩放倍数、准星、覆盖层样式等）。其中 `spyglassZoom` 是**由游戏写回**的：滚轮调完缩放后会记住，下次启动直接恢复
 
 **每一项功能都有独立的总开关，默认全部开启。** 总开关关闭时该项功能被整体禁用，玩家在游戏内**无法**重新打开。此外还有若干数值可调，例如：
 
@@ -77,6 +83,8 @@
 | 平坦基岩 | [Flat Bedrock](https://www.curseforge.com/minecraft/mc-mods/flat-bedrock) | MIT |
 | 亮度扩展 | [GJEB (GammaJustExtremeBright)](https://github.com/MC-U-Team/GJEB-GammaJustExtremeBright)（HyCraftHD / Team U-Team） | Apache-2.0 |
 | 附魔金苹果强化 | 附魔金苹果重生（enchanted_golden_apple_reborn） | — |
+| 饱和度机制 | [Saturation Plus](https://www.curseforge.com/minecraft/mc-mods/saturation-plus)（MrKirbychu） | CC0-1.0 |
+| 望远镜改进 | [Spyglass Improvements](https://github.com/juancarloscp52/spyglass-improvements)（juancarloscp52） | GPL-3.0 |
 
 移植时依照本模组的既有约定做了重写（配置改为 Forge 配置项、提示改为动作栏、热键默认不绑定等），并非原样搬运。
 

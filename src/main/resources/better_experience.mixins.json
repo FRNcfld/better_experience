@@ -11,10 +11,20 @@
         "FlatBedrockMixin",
         "FoodsMixin",
         "ItemMixin",
-        "PlayerElytraFlightMixin"
+        "PlayerElytraFlightMixin",
+        "SaturationCanEatMixin",
+        "SaturationEffectMixin",
+        "SaturationFoodDataMixin"
     ],
     "client": [
         "GammaLightTextureMixin",
-        "GammaOptionsMixin"
+        "GammaOptionsMixin",
+        "SpyglassBobViewMixin",
+        "SpyglassCameraMixin",
+        "SpyglassFovMixin",
+        "SpyglassGuiMixin",
+        "SpyglassScopingMixin",
+        "SpyglassScrollMixin",
+        "SpyglassSmoothCameraMixin"
     ]
 }

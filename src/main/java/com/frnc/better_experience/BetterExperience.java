@@ -3,6 +3,7 @@ package com.frnc.better_experience;
 import com.frnc.better_experience.doublejump.JumpHandler;
 import com.frnc.better_experience.doublejump.network.DoubleJumpNetwork;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightNetwork;
+import com.frnc.better_experience.saturation.network.SaturationNetwork;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 /**
@@ -51,12 +53,20 @@ public class BetterExperience {
 
         modEventBus.addListener(this::commonSetup);
 
-        // 所有开关集中在 COMMON 配置: config/better_experience-common.toml
+        // 服务端/世界机制集中在 COMMON 配置: config/better_experience-common.toml
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
-        // 二段跳 / 鞘翅飞行开关的网络通道（各一条）
+        // 纯客户端偏好单独一份: config/better_experience-client.toml (望远镜缩放等)。
+        // CLIENT 类型在专用服务器上不存在, 所以只在客户端注册, 避免服务端刷无意义的警告。
+        if (FMLEnvironment.dist.isClient())
+        {
+            context.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        }
+
+        // 二段跳 / 鞘翅飞行开关 / 饱和度同步的网络通道（各一条）
         DoubleJumpNetwork.register();
         ElytraFlightNetwork.register();
+        SaturationNetwork.register();
 
         MinecraftForge.EVENT_BUS.register(this);
 

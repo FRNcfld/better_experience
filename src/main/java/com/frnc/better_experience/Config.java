@@ -5,6 +5,7 @@ import com.frnc.better_experience.stepassist.StepAssistMode;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 /**
@@ -114,6 +115,38 @@ public class Config
             .comment("Height (in blocks) that can be stepped up smoothly while sprinting. Vanilla is 0.6")
             .defineInRange("stepAssistSprintHeight", 1.25D, 0.0D, 10.0D);
 
+    private static final ForgeConfigSpec.BooleanValue SATURATION_ENABLED = BUILDER
+            .comment("Master switch for the saturation feature. When false every saturation change below is skipped and food behaves exactly like vanilla")
+            .define("saturationEnabled", true);
+
+    private static final ForgeConfigSpec.BooleanValue SATURATION_ALWAYS_HUNGRY = BUILDER
+            .comment("Whether food can always be eaten, regardless of how full the hunger bar is. Needed to turn overflowing food into saturation")
+            .define("saturationAlwaysHungry", true);
+
+    private static final ForgeConfigSpec.BooleanValue SATURATION_HUNGER_LIMITS_SATURATION = BUILDER
+            .comment("Whether saturation is capped at the current hunger level (this is vanilla behaviour). Leave false to let saturation be stored above the hunger bar")
+            .define("saturationHungerLimitsSaturation", false);
+
+    private static final ForgeConfigSpec.IntValue SATURATION_MAX_SATURATION = BUILDER
+            .comment("Hard cap for stored saturation. Negative means no cap")
+            .defineInRange("saturationMaxSaturation", -1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+    private static final ForgeConfigSpec.IntValue SATURATION_MAX_EXHAUSTION = BUILDER
+            .comment("Exhaustion required before hunger or saturation is lost (vanilla is 4). Values <= 0 disable exhaustion loss entirely")
+            .defineInRange("saturationMaxExhaustion", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+    private static final ForgeConfigSpec.DoubleValue SATURATION_OVERFLOW_RATIO = BUILDER
+            .comment("When eating at full hunger, how much of the overflowing hunger is converted into saturation. 1.0 = one saturation point per overflowing hunger point")
+            .defineInRange("saturationOverflowRatio", 1.0D, 0.0D, 100.0D);
+
+    private static final ForgeConfigSpec.IntValue SATURATION_EFFECT_DECAY_RATE = BUILDER
+            .comment("How strongly the Saturation status effect's gain decays as saturation grows. Larger values damp it harder, 0 disables the damping")
+            .defineInRange("saturationEffectDecayRate", 2, 0, Integer.MAX_VALUE);
+
+    private static final ForgeConfigSpec.BooleanValue SATURATION_SHOW_HUD = BUILDER
+            .comment("Whether to show the saturation readout on the HUD (survival and adventure only). This is a client-side display option")
+            .define("saturationShowHud", true);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     public static boolean doubleJumpEnabled;
@@ -145,10 +178,24 @@ public class Config
     public static double stepAssistStepHeight = 1.25D;
     public static double stepAssistSneakHeight = 0.6D;
     public static double stepAssistSprintHeight = 1.25D;
+    // 饱和度机制的配置; 同样把初值写成配置文件默认值 (mixin 在运行时读, 不受加载顺序影响, 但保持一致更安全)
+    public static boolean saturationEnabled = true;
+    public static boolean saturationAlwaysHungry = true;
+    public static boolean saturationHungerLimitsSaturation = false;
+    public static int saturationMaxSaturation = -1;
+    public static int saturationMaxExhaustion = 4;
+    public static double saturationOverflowRatio = 1.0D;
+    public static int saturationEffectDecayRate = 2;
+    public static boolean saturationShowHud = true;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
+        // ModConfigEvent 对**所有**配置都会触发。本模组现在有两份配置 (COMMON + CLIENT),
+        // 不加这个判断就会在其中一份加载时去读另一份尚未加载的值, 抛
+        // "Cannot get config value before config is loaded"。
+        if (event.getConfig().getType() != ModConfig.Type.COMMON) return;
+
         doubleJumpEnabled = DOUBLE_JUMP_ENABLED.get();
         doubleJumpFeatureEnabled = DOUBLE_JUMP_FEATURE_ENABLED.get();
         elytraFlightEnabled = ELYTRA_FLIGHT_ENABLED.get();
@@ -173,5 +220,13 @@ public class Config
         stepAssistStepHeight = STEP_ASSIST_STEP_HEIGHT.get();
         stepAssistSneakHeight = STEP_ASSIST_SNEAK_HEIGHT.get();
         stepAssistSprintHeight = STEP_ASSIST_SPRINT_HEIGHT.get();
+        saturationEnabled = SATURATION_ENABLED.get();
+        saturationAlwaysHungry = SATURATION_ALWAYS_HUNGRY.get();
+        saturationHungerLimitsSaturation = SATURATION_HUNGER_LIMITS_SATURATION.get();
+        saturationMaxSaturation = SATURATION_MAX_SATURATION.get();
+        saturationMaxExhaustion = SATURATION_MAX_EXHAUSTION.get();
+        saturationOverflowRatio = SATURATION_OVERFLOW_RATIO.get();
+        saturationEffectDecayRate = SATURATION_EFFECT_DECAY_RATE.get();
+        saturationShowHud = SATURATION_SHOW_HUD.get();
     }
 }

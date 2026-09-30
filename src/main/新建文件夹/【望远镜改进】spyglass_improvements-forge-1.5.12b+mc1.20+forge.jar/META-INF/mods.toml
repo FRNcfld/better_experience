@@ -1,0 +1,39 @@
+modLoader = "javafml"
+loaderVersion = "[46,)"
+issueTrackerURL="https://github.com/juancarloscp52/spyglass-improvements/issues"
+license="GNU GPL 3.0"
+showAsResourcePack=false
+[[mods]]
+modId = "spyglass_improvements"
+version = "1.5.12b"
+displayName = "Spyglass Improvements"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/spyglass-improvements"
+logoFile="icon.png"
+authors="juancarloscp52 (Im_JC)"
+description="Enhance Minecraft Spyglass with adjustable zoom, quick access and various spyglass overlays."
+
+[[dependencies.spyglass_improvements]]
+modId = "forge"
+mandatory = true
+versionRange = "[46,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.spyglass_improvements]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20,1.20.2)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.spyglass_improvements]]
+modId="curios"
+mandatory = false
+versionRange="[5.5,)"
+ordering="BEFORE"
+side="BOTH"
+
+[[mixins]]
+config = "spyglass_improvements.common.mixins.json"
+[[mixins]]
+config = "spyglass_improvements.neoforge.mixins.json"
