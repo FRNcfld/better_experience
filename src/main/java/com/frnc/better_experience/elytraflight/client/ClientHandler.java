@@ -7,9 +7,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.lwjgl.glfw.GLFW;
 
-/** 客户端按键注册: H 键切换鞘翅飞行开关 (可在「控制」中改绑) */
+/** 客户端按键注册: 切换鞘翅飞行开关。默认不绑定按键, 需在「控制」中自行设置 */
 @Mod.EventBusSubscriber(modid = BetterExperience.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientHandler
 {
@@ -19,7 +18,7 @@ public class ClientHandler
     public static final KeyMapping TOGGLE_KEY = new KeyMapping(
             KEY_TOGGLE_ELYTRA_FLIGHT,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_H,
+            InputConstants.UNKNOWN.getValue(),
             KEY_CATEGORY
     );
 

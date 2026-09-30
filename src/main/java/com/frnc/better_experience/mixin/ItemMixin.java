@@ -27,6 +27,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * {@code LivingEntity.addEatEffect} → {@code ItemStack.getFoodProperties(LivingEntity)}
  * (Forge 默认方法) → {@code Item.getFoodProperties(ItemStack, LivingEntity)}
  * (Forge 默认方法) → {@code Item.getFoodProperties()} ← 本注入点。
+ *
+ * <p><strong>客户端与服务端配置不一致时会怎样</strong>(已对整个原版源码核实):
+ * 本注入读的是<strong>本侧</strong>的配置, 所以两侧的 {@code enchantedGoldenAppleBuffEnabled}
+ * 不一致时, 两侧拿到的 {@code FoodProperties} 确实不同。但<strong>原版下这既不可观测、也没有行为差异</strong>:
+ * <ul>
+ *   <li>客户端能读到该返回值的地方只有三处, 且读的都是两套属性<strong>完全相同</strong>的字段:
+ *       {@code LivingEntity#shouldTriggerItemUseEffects} 与 {@code Item#getUseDuration} 读
+ *       {@code isFastFood()} (强化版与原版皆为 false), {@code Item#use} 读 {@code canAlwaysEat()}
+ *       (两者皆为 true)。两套属性真正的差异 (各效果的时长与等级、营养与饱和度) 都不在这几个字段里;</li>
+ *   <li>那条效果的施加点在 {@code LivingEntity#addEatEffect}, 其 {@code !pLevel.isClientSide}
+ *       判断保证效果只在服务端施加;</li>
+ *   <li>饥饿值与饱和度的改动只经过 {@code completeUsingItem()}, 而它被
+ *       {@code !this.level().isClientSide} 挡在服务端; 客户端的 {@code FoodData} 本来就靠血量包同步;</li>
+ *   <li>原版 1.20.1 <strong>不显示</strong>食物属性, 物品提示与该返回值无关。</li>
+ * </ul>
+ *
+ * <p>唯一的例外是<strong>第三方食物信息模组</strong>(AppleSkin 之类): 它们在客户端读
+ * {@code ItemStack#getFoodProperties} 来画饥饿值预览与效果提示, 配置不一致时显示的是客户端那份值,
+ * 而实际生效的是服务端那份。属显示层面, 不影响实际效果。
+ *
+ * <p>之所以<strong>不按逻辑侧分支</strong>来彻底消除这个差异: {@code Item#getUseDuration} 调用时传入的
+ * entity 是 {@code null} ({@code pStack.getFoodProperties(null)}), 在那里拿不到可靠的逻辑侧。
  */
 @Mixin(Item.class)
 public abstract class ItemMixin

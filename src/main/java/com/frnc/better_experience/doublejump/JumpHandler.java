@@ -48,15 +48,27 @@ public class JumpHandler
         LOGGER.info("[better_experience] 二段跳默认状态: {}", defaultEnabled);
     }
 
-    /** 服务端: 该玩家的二段跳开关 (未记录的玩家按配置默认值处理) */
+    /**
+     * 服务端: 该玩家的二段跳开关。
+     *
+     * <p>配置 {@code doubleJumpFeatureEnabled} 是<strong>功能级总开关</strong>: 关掉时这里恒为 false,
+     * 玩家在游戏内怎么按都开不回来 (凌驾于每名玩家的开关与 {@code doubleJumpEnabled} 默认值之上)。
+     */
     public static boolean isDoubleJumpEnabled(Player player)
     {
+        if (!Config.doubleJumpFeatureEnabled) return false;
         return enabledByPlayer.getOrDefault(player.getUUID(), defaultEnabled);
     }
 
-    /** 服务端: 切换该玩家的二段跳开关, 返回切换后的新状态 */
+    /** 服务端: 切换该玩家的二段跳开关, 返回切换后的新状态 (功能被总开关关闭时恒为 false) */
     public static boolean toggleDoubleJump(Player player)
     {
+        if (!Config.doubleJumpFeatureEnabled)
+        {
+            LOGGER.info("[better_experience] 二段跳功能已被配置关闭, 忽略玩家 {} 的切换请求", player.getName().getString());
+            return false;
+        }
+
         boolean newState = !isDoubleJumpEnabled(player);
         enabledByPlayer.put(player.getUUID(), newState);
         LOGGER.info("[better_experience] 玩家 {} 的二段跳开关: {}", player.getName().getString(), newState);

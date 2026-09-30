@@ -1,6 +1,7 @@
 package com.frnc.better_experience.elytraflight;
 
 import com.frnc.better_experience.BetterExperience;
+import com.frnc.better_experience.Config;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightNetwork;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightStatePacket;
 import com.mojang.logging.LogUtils;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 鞘翅飞行开关 (默认 H 键可切换, 键位可在「控制」中改绑):
+ * 鞘翅飞行开关 (按键切换, 热键默认不绑定, 需在「控制」中自行设置):
  *   - 开启时鞘翅飞行可正常触发; 关闭时无法起飞。
  *   - 开关状态每名玩家独立, 服务端权威; 热键切换只改内存态, 不写配置文件。
  *   - 拦截点为原版 {@code Player#tryToStartFallFlying} (见 mixin PlayerElytraFlightMixin),
@@ -46,6 +47,9 @@ public class ElytraFlightHandler
      */
     public static boolean isFlightAllowed(Player player)
     {
+        // 功能级总开关关闭时回到原版行为: 一律允许起飞
+        if (!Config.elytraFlightEnabled) return true;
+
         if (player.level().isClientSide)
         {
             return clientEnabled;
@@ -53,15 +57,27 @@ public class ElytraFlightHandler
         return isEnabled(player);
     }
 
-    /** 服务端: 该玩家的鞘翅飞行开关 (未知玩家按默认开启) */
+    /**
+     * 服务端: 该玩家的鞘翅飞行开关 (未知玩家按默认开启)。
+     *
+     * <p>配置 {@code elytraFlightEnabled} 是<strong>功能级总开关</strong>: 关掉时这里恒为 true
+     * (即回到"原版允许起飞"), 玩家在游戏内怎么按都关不掉。
+     */
     public static boolean isEnabled(Player player)
     {
+        if (!Config.elytraFlightEnabled) return true;
         return enabledByPlayer.getOrDefault(player.getUUID(), true);
     }
 
-    /** 服务端: 切换该玩家的鞘翅飞行开关, 返回切换后的新状态 */
+    /** 服务端: 切换该玩家的鞘翅飞行开关, 返回切换后的新状态 (功能被总开关关闭时恒为 true) */
     public static boolean toggleFlight(Player player)
     {
+        if (!Config.elytraFlightEnabled)
+        {
+            LOGGER.info("[better_experience] 鞘翅飞行开关功能已被配置关闭, 忽略玩家 {} 的切换请求", player.getName().getString());
+            return true;
+        }
+
         boolean newState = !isEnabled(player);
         enabledByPlayer.put(player.getUUID(), newState);
         LOGGER.info("[better_experience] 玩家 {} 的鞘翅飞行开关: {}", player.getName().getString(), newState);

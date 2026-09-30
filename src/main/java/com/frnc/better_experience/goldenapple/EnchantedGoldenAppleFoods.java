@@ -20,20 +20,25 @@ public final class EnchantedGoldenAppleFoods {
     public static FoodProperties vanilla;
 
     /**
-     * 强化版:与原版逐项相同,<strong>仅生命恢复一项不同</strong>——
-     * 由原版的 II 级 20 秒(400 tick)改为 V 级 60 秒(1200 tick)。
+     * 强化版:比原版强化了<strong>生命恢复 / 抗性提升 / 伤害吸收 / 营养 / 饱和度</strong>五项,
+     * 防火与"可随时食用"与原版一致。
      *
-     * <p>其余四项(抗性提升 I / 防火 I 各 300 秒、伤害吸收 IV 120 秒)与营养值 4、
-     * 饱和度 1.2、可随时食用均与原版一致,照抄是为了与上游模组保持逐字可对照。
+     * <p>逐项对照见 {@link com.frnc.better_experience.mixin.FoodsMixin} 的表格。等级换算:
+     * {@code MobEffectInstance} 的 amplifier 从 0 起算, 所以等级 III = amplifier 2、
+     * 等级 V = amplifier 4。
+     *
+     * <p>饱和度按原版公式 {@code 营养 × 饱和度系数 × 2} 结算, 且<strong>封顶在饥饿值</strong>
+     * (见 {@code FoodData#eat(int, float)}): 这里 {@code 10 × 3.0 × 2 = 60}, 远超上限,
+     * 实际效果就是把饱和度条直接拉满; 营养 10 同理会把饥饿值顶到上限 20。
      */
     public static FoodProperties buffed() {
         return new FoodProperties.Builder()
-                .nutrition(4)
-                .saturationMod(1.2F)
+                .nutrition(10)
+                .saturationMod(3.0F)
                 .effect(new MobEffectInstance(MobEffects.REGENERATION, 1200, 4), 1.0F)
-                .effect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 6000, 0), 1.0F)
+                .effect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 6000, 2), 1.0F)
                 .effect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 6000, 0), 1.0F)
-                .effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 3), 1.0F)
+                .effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 4), 1.0F)
                 .alwaysEat()
                 .build();
     }

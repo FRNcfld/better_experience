@@ -13,7 +13,7 @@ displayName="${mod_name}"
 authors="${mod_authors}"
 
 # 说明文本直接写在这里（不要放进 gradle.properties：那里被 Gradle 以 ISO-8859-1 读取，中文会乱码）。
-description='''原版体验优化：二段跳、鞘翅飞行开关、掉落物定时清理、附魔金苹果强化。'''
+description='''原版体验优化：二段跳、鞘翅飞行开关、掉落物定时清理、附魔金苹果强化、平坦基岩、亮度上限扩展到 1000%、上坡辅助。'''
 
 [[dependencies.${mod_id}]]
     modId="forge"

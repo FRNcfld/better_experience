@@ -52,7 +52,7 @@ public class KeyInputHandler
 
         if (mc.screen != null) return;
 
-        // 切换二段跳开关 (默认 J 键), 服务端会回发聊天消息确认状态
+        // 切换二段跳开关 (默认不绑定按键), 服务端会回发聊天消息确认状态
         if (ClientHandler.TOGGLE_KEY.consumeClick())
         {
             DoubleJumpNetwork.CHANNEL.sendToServer(new ToggleDoubleJumpPacket());

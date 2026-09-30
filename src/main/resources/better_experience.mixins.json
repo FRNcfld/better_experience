@@ -8,9 +8,13 @@
         "defaultRequire": 1
     },
     "mixins": [
+        "FlatBedrockMixin",
         "FoodsMixin",
         "ItemMixin",
         "PlayerElytraFlightMixin"
     ],
-    "client": []
+    "client": [
+        "GammaLightTextureMixin",
+        "GammaOptionsMixin"
+    ]
 }

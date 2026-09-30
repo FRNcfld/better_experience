@@ -10,7 +10,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
-/** 客户端 -> 服务端: 切换二段跳开关, 服务端回发聊天消息并把新状态同步给客户端 */
+/** 客户端 -> 服务端: 切换二段跳开关, 服务端回发动作栏提示并把新状态同步给客户端 */
 public class ToggleDoubleJumpPacket
 {
     public ToggleDoubleJumpPacket() {}
@@ -35,7 +35,8 @@ public class ToggleDoubleJumpPacket
                             ? "message.better_experience.double_jump.enabled"
                             : "message.better_experience.double_jump.disabled")
                     .withStyle(newState ? ChatFormatting.GREEN : ChatFormatting.RED);
-            player.sendSystemMessage(message);
+            // 走动作栏而不是聊天栏, 与亮度 / 上坡辅助的按键提示保持一致 (第二个参数 true = 动作栏)
+            player.displayClientMessage(message, true);
 
             // 同步状态给客户端, 使其据此决定是否触发二段跳
             DoubleJumpNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new DoubleJumpStatePacket(newState));

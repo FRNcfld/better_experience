@@ -21,7 +21,7 @@ public class KeyInputHandler
         if (mc.player == null) return;
         if (mc.screen != null) return;
 
-        // 切换鞘翅飞行开关 (默认 H 键, 尊重玩家改绑), 服务端会回发聊天消息确认状态
+        // 切换鞘翅飞行开关 (默认不绑定按键), 服务端会回发聊天消息确认状态
         if (ClientHandler.TOGGLE_KEY.consumeClick())
         {
             ElytraFlightNetwork.CHANNEL.sendToServer(new ToggleElytraFlightPacket());

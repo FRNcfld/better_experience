@@ -12,20 +12,24 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * 强化附魔金苹果的生命恢复效果 (来源: 【附魔金苹果重生】enchanted_golden_apple_reborn 1.4 的 FoodsMixin)。
+ * 强化附魔金苹果的食物属性 (来源: 【附魔金苹果重生】enchanted_golden_apple_reborn 1.4 的 FoodsMixin)。
  *
  * <p>在 {@code Foods.<clinit>} 的 TAIL 注入, 把 {@code Foods.ENCHANTED_GOLDEN_APPLE} 换成强化版。
- * 与原版 1.20.1 逐项对照如下 (只改了生命恢复一项):
+ * 与原版 1.20.1 逐项对照如下 (改了五项, 防火与"可随时食用"与原版一致):
  *
  * <table>
  *   <tr><th>效果</th><th>强化版</th><th>原版</th></tr>
  *   <tr><td>生命恢复</td><td>1200 tick (60s), 等级 V</td><td>400 tick (20s), 等级 II</td></tr>
- *   <tr><td>抗性提升</td><td>6000 tick, 等级 I</td><td>同</td></tr>
- *   <tr><td>防火</td><td>6000 tick, 等级 I</td><td>同</td></tr>
- *   <tr><td>伤害吸收</td><td>2400 tick, 等级 IV</td><td>同</td></tr>
- *   <tr><td>营养 / 饱和度</td><td>4 / 1.2</td><td>同</td></tr>
+ *   <tr><td>抗性提升</td><td>6000 tick (300s), 等级 III</td><td>6000 tick (300s), 等级 I</td></tr>
+ *   <tr><td>防火</td><td>6000 tick (300s), 等级 I</td><td>同</td></tr>
+ *   <tr><td>伤害吸收</td><td>2400 tick (120s), 等级 V</td><td>2400 tick (120s), 等级 IV</td></tr>
+ *   <tr><td>营养 / 饱和度系数</td><td>10 / 3.0</td><td>4 / 1.2</td></tr>
  *   <tr><td>可随时食用</td><td>是</td><td>同</td></tr>
  * </table>
+ *
+ * <p>等级换算: {@code MobEffectInstance} 的 amplifier 从 0 起算, 所以等级 III = amplifier 2、
+ * 等级 V = amplifier 4。饱和度按 {@code 营养 × 饱和度系数 × 2} 结算并封顶在饥饿值,
+ * 这里算出来是 60、远超上限, 实际就是把饱和度条拉满 (详见 {@link EnchantedGoldenAppleFoods#buffed()})。
  *
  * <p><strong>是否生效由配置项 {@code better_experience-common.toml} 的 {@code enchantedGoldenAppleBuffEnabled}
  * 决定, 默认开启。</strong> 但本类<strong>不读配置</strong>——{@code Foods.<clinit>} 与配置加载的
