@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-MixinConfigs: spyglass_improvements.common.mixins.json,spyglass_improvem
- ents.forge.mixins.json
-
