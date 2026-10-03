@@ -21,5 +21,7 @@
     "advancements.better_experience.getega.title": "Notch Apple",
     "advancements.better_experience.getega.description": "Obtain an Enchanted Golden Apple",
     "advancements.better_experience.use_ega.title": "Reign Supreme in the World",
-    "advancements.better_experience.use_ega.description": "Eat an Enchanted Golden Apple"
+    "advancements.better_experience.use_ega.description": "Eat an Enchanted Golden Apple",
+    "enchantment.better_experience.ocean_blessing": "Ocean's Blessing",
+    "enchantment.better_experience.ocean_blessing.desc": "Lifts the water / weather requirements of Riptide and Channeling on this trident,\nand makes Impaling's bonus damage apply to any mob"
 }

@@ -23,6 +23,7 @@
 | **上坡辅助** | 可直接走上整格方块；按键在「关闭 / 上坡 / 自动跳跃」三档间循环，行走·潜行·疾跑三档高度可调 | 纯客户端 |
 | **饱和度机制** | 饱和度不再被饥饿值封顶；饥饿满时进食，多出的营养按比例（默认 1:1，可配）转成饱和度；可无限进食；HUD 显示饱和度与消耗度 | 服务端权威 |
 | **望远镜改进** | 望远镜放在**饰品栏**（Curios，可选）或背包里也能按键使用；滚轮调整放大（默认最大 10 倍，可配）并**记住**设置；开镜时显示准星与放大倍数 | 纯客户端 |
+| **海洋之祝附魔** | 新增的**三叉戟专属**附魔（宝藏附魔）：带它时**激流**不再要求水中/雨中，**引雷**不再要求雷雨天，**穿刺**的加伤对所有生物生效 | 双端 |
 
 ## 热键
 
@@ -40,16 +41,18 @@
 
 ## 配置
 
-配置文件有两份（首次启动后生成）：
+配置文件有两份（首次启动后生成），都**按功能分小节**，小节名就是功能名，且每个小节的**第一项都是该功能的总开关**：
 
-- `config/better_experience-common.toml` —— 服务端 / 世界机制（掉落物清理、饱和度、上坡辅助、平坦基岩等）
-- `config/better_experience-client.toml` —— 纯客户端偏好（望远镜的缩放倍数、准星、覆盖层样式等）。其中 `spyglassZoom` 是**由游戏写回**的：滚轮调完缩放后会记住，下次启动直接恢复
+- `config/better_experience-common.toml` —— 服务端 / 世界机制。小节：`[double_jump]`、`[elytra_flight]`、`[step_assist]`、`[item_cleanup]`、`[enchanted_golden_apple]`、`[flat_bedrock]`、`[extended_gamma]`、`[saturation]`、`[ocean_blessing]`
+- `config/better_experience-client.toml` —— 纯客户端偏好（望远镜的缩放倍数、准星、覆盖层样式等）。小节：`[spyglass]`。其中 `spyglass.spyglassZoom` 是**由游戏写回**的：滚轮调完缩放后会记住，下次启动直接恢复
 
 **每一项功能都有独立的总开关，默认全部开启。** 总开关关闭时该项功能被整体禁用，玩家在游戏内**无法**重新打开。此外还有若干数值可调，例如：
 
-- `stepAssistMode` / `stepAssistStepHeight` / `stepAssistSneakHeight` / `stepAssistSprintHeight` — 上坡辅助的初始档位与三档高度
-- `cleanupIntervalSeconds` / `cleanupWarningSeconds` — 掉落物清理的间隔与预警时间
-- `cleanupItemBlacklistEnable` 等四个开关 — 黑白名单是否生效，名单本身在数据包里（`data/better_experience/dropped_item_cleanup/`）
+- `step_assist.stepAssistMode` / `step_assist.stepAssistStepHeight` / `step_assist.stepAssistSneakHeight` / `step_assist.stepAssistSprintHeight` — 上坡辅助的初始档位与三档高度
+- `item_cleanup.cleanupIntervalSeconds` / `item_cleanup.cleanupWarningSeconds` — 掉落物清理的间隔与预警时间
+- `item_cleanup.cleanupItemBlacklistEnable` 等四个开关 — 黑白名单是否生效，名单本身在数据包里（`data/better_experience/dropped_item_cleanup/`）
+
+> **升级提示**：配置项现在带小节前缀（如原来的 `cleanupIntervalSeconds` 现在是 `item_cleanup.cleanupIntervalSeconds`）。直接覆盖更新旧版本时，Forge 会按新结构补全文件，旧文件里不带前缀的那些值不会自动迁移，会回到默认值，需要重新设一遍。
 
 > 本模组的配置是 **COMMON** 类型，双端各读各的文件、**不做同步**。因此双端 / 服务端功能的开关以**服务端**的配置为准，纯客户端功能（亮度扩展、上坡辅助）以你自己客户端的配置为准。多人服务器上，二段跳与鞘翅的开关状态由服务端下发，你本地改配置不会生效。
 
@@ -60,6 +63,11 @@
 - **上坡辅助是纯客户端功能**，不改服务端。服务端那份你的上坡高度仍是原版 0.6，所以把高度设得过大时，服务端可能拒绝你的位移、把你拉回去。多人游戏请谨慎调高。
 - **附魔金苹果强化**的数值目前是硬编码的，只有总开关可配。
 - 如果你使用**食物信息类模组**（AppleSkin 等），在客户端与服务端配置不一致时，它们显示的会是客户端那份数值，而实际生效的以服务端为准。
+- **海洋之祝是宝藏附魔**：附魔台刷不出它的附魔书，生存下只能靠战利品箱 / 钓鱼得到的附魔书，再在铁砧上打到三叉戟上。创造模式里它的附魔书由 Forge 自动放进原版**原材料**标签页，不需要额外操作。
+- **激流与引雷在原版就是互斥的**（`isCompatibleWith` 双向判定，铁砧也合不上），本模组**没有**解除这层互斥。所以「海洋之祝 + 激流」与「海洋之祝 + 引雷」是两个独立组合，同一把三叉戟上只能生效其中一个效果。
+- **穿刺的加伤**改成对任意目标都算，因此带海洋之祝的三叉戟在物品提示里「主手伤害」也会跟着变高——这不是显示错误，此时那个加成本来就对所有生物生效。
+- **引雷有两条落雷路径**，都已被海洋之祝覆盖：命中生物时在生物脚下落雷，命中**避雷针方块**时在避雷针处落雷。所以晴天带海洋之祝也能直接打避雷针制造雷击。
+- 附魔描述已按惯例写进语言文件（`enchantment.better_experience.ocean_blessing.desc`），但**原版不渲染附魔描述**，需要安装 Enchantment Descriptions 之类的模组才会显示。
 
 ## 构建
 
@@ -85,6 +93,7 @@
 | 附魔金苹果强化 | 附魔金苹果重生（enchanted_golden_apple_reborn） | — |
 | 饱和度机制 | [Saturation Plus](https://www.curseforge.com/minecraft/mc-mods/saturation-plus)（MrKirbychu） | CC0-1.0 |
 | 望远镜改进 | [Spyglass Improvements](https://github.com/juancarloscp52/spyglass-improvements)（juancarloscp52） | GPL-3.0 |
+| 海洋之祝 | 本模组原创（未移植任何模组） | — |
 
 移植时依照本模组的既有约定做了重写（配置改为 Forge 配置项、提示改为动作栏、热键默认不绑定等），并非原样搬运。
 

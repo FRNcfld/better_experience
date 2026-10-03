@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,7 +29,7 @@ public abstract class SaturationCanEatMixin
     @Inject(method = "canEat(Z)Z", at = @At("HEAD"), cancellable = true)
     private void betterExperience$alwaysHungry(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir)
     {
-        if (!Config.saturationEnabled || !Config.saturationAlwaysHungry) return;
+        if (!BetterExperienceServerConfig.saturationEnabled || !BetterExperienceServerConfig.saturationAlwaysHungry) return;
 
         cir.setReturnValue(true);
     }

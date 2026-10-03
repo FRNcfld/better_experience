@@ -1,7 +1,7 @@
 package com.frnc.better_experience.elytraflight;
 
 import com.frnc.better_experience.BetterExperience;
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightNetwork;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightStatePacket;
 import com.mojang.logging.LogUtils;
@@ -48,7 +48,7 @@ public class ElytraFlightHandler
     public static boolean isFlightAllowed(Player player)
     {
         // 功能级总开关关闭时回到原版行为: 一律允许起飞
-        if (!Config.elytraFlightEnabled) return true;
+        if (!BetterExperienceServerConfig.elytraFlightEnabled) return true;
 
         if (player.level().isClientSide)
         {
@@ -65,14 +65,14 @@ public class ElytraFlightHandler
      */
     public static boolean isEnabled(Player player)
     {
-        if (!Config.elytraFlightEnabled) return true;
+        if (!BetterExperienceServerConfig.elytraFlightEnabled) return true;
         return enabledByPlayer.getOrDefault(player.getUUID(), true);
     }
 
     /** 服务端: 切换该玩家的鞘翅飞行开关, 返回切换后的新状态 (功能被总开关关闭时恒为 true) */
     public static boolean toggleFlight(Player player)
     {
-        if (!Config.elytraFlightEnabled)
+        if (!BetterExperienceServerConfig.elytraFlightEnabled)
         {
             LOGGER.info("[better_experience] 鞘翅飞行开关功能已被配置关闭, 忽略玩家 {} 的切换请求", player.getName().getString());
             return true;

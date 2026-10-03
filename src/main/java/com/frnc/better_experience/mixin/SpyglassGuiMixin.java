@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 import com.frnc.better_experience.spyglass.SpyglassOverlayStyle;
 
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,7 @@ public abstract class SpyglassGuiMixin
     @Inject(method = "renderSpyglassOverlay", at = @At("HEAD"), cancellable = true)
     private void betterExperience$hideOverlay(GuiGraphics graphics, float scopeScale, CallbackInfo ci)
     {
-        if (ClientConfig.spyglassEnabled && ClientConfig.spyglassOverlay == SpyglassOverlayStyle.NONE)
+        if (BetterExperienceClientConfig.spyglassEnabled && BetterExperienceClientConfig.spyglassOverlay == SpyglassOverlayStyle.NONE)
         {
             ci.cancel();
         }
@@ -41,7 +41,7 @@ public abstract class SpyglassGuiMixin
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void betterExperience$hideCrosshair(GuiGraphics graphics, CallbackInfo ci)
     {
-        if (!ClientConfig.spyglassEnabled || ClientConfig.spyglassShowCrosshair) return;
+        if (!BetterExperienceClientConfig.spyglassEnabled || BetterExperienceClientConfig.spyglassShowCrosshair) return;
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && player.isScoping())

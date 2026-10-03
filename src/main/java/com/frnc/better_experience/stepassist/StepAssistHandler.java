@@ -1,7 +1,7 @@
 package com.frnc.better_experience.stepassist;
 
 import com.frnc.better_experience.BetterExperience;
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -37,7 +37,7 @@ public class StepAssistHandler
     /** 原版玩家基准上坡高度 (Player 构造时 {@code setMaxUpStep(0.6F)}) */
     private static final double VANILLA_STEP_HEIGHT = 0.6D;
 
-    private static StepAssistMode mode = Config.stepAssistMode;
+    private static StepAssistMode mode = BetterExperienceServerConfig.stepAssistMode;
 
     public static StepAssistMode getMode()
     {
@@ -61,7 +61,7 @@ public class StepAssistHandler
 
         // 功能级总开关关闭: 只还原原版上坡高度, 并且完全不碰原版「自动跳跃」选项——
         // 否则会在玩家没要求的情况下把他自己的自动跳跃设置改掉
-        if (!Config.stepAssistEnabled)
+        if (!BetterExperienceServerConfig.stepAssistEnabled)
         {
             applyStepHeight(player, VANILLA_STEP_HEIGHT);
             return;
@@ -79,14 +79,14 @@ public class StepAssistHandler
     {
         if (mode != StepAssistMode.STEP) return VANILLA_STEP_HEIGHT;
 
-        if (player.isShiftKeyDown()) return Config.stepAssistSneakHeight;
+        if (player.isShiftKeyDown()) return BetterExperienceServerConfig.stepAssistSneakHeight;
 
         // 疾跑键按住但尚未真正进入疾跑 (例如刚起步、或顶着墙) 也按疾跑算;
         // 且必须有前进输入, 否则站着按疾跑键不该抬高上坡高度
         boolean sprinting = player.isSprinting() || mc.options.keySprint.isDown();
-        if (sprinting && player.input.hasForwardImpulse()) return Config.stepAssistSprintHeight;
+        if (sprinting && player.input.hasForwardImpulse()) return BetterExperienceServerConfig.stepAssistSprintHeight;
 
-        return Config.stepAssistStepHeight;
+        return BetterExperienceServerConfig.stepAssistStepHeight;
     }
 
     /**

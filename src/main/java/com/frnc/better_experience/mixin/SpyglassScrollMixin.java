@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 import com.frnc.better_experience.spyglass.client.SpyglassZoom;
 
 import net.minecraft.client.Minecraft;
@@ -27,7 +27,7 @@ public abstract class SpyglassScrollMixin
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
     private void betterExperience$zoomOnScroll(long window, double xOffset, double yOffset, CallbackInfo ci)
     {
-        if (!ClientConfig.spyglassEnabled) return;
+        if (!BetterExperienceClientConfig.spyglassEnabled) return;
 
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;

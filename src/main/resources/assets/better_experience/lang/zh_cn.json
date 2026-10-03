@@ -21,5 +21,7 @@
     "advancements.better_experience.getega.title": "Notch苹果",
     "advancements.better_experience.getega.description": "获取一个附魔金苹果",
     "advancements.better_experience.use_ega.title": "君临天下",
-    "advancements.better_experience.use_ega.description": "吃下一个附魔金苹果"
+    "advancements.better_experience.use_ega.description": "吃下一个附魔金苹果",
+    "enchantment.better_experience.ocean_blessing": "海洋之祝",
+    "enchantment.better_experience.ocean_blessing.desc": "解除本三叉戟上激流的水 / 雨限制与引雷的雷雨天限制，\n并让穿刺的加伤对所有生物生效"
 }

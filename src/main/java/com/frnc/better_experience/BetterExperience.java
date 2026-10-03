@@ -3,6 +3,7 @@ package com.frnc.better_experience;
 import com.frnc.better_experience.doublejump.JumpHandler;
 import com.frnc.better_experience.doublejump.network.DoubleJumpNetwork;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightNetwork;
+import com.frnc.better_experience.oceanblessing.OceanBlessingEnchantments;
 import com.frnc.better_experience.saturation.network.SaturationNetwork;
 import com.mojang.logging.LogUtils;
 
@@ -30,6 +31,9 @@ import org.slf4j.Logger;
  *   <li><b>平坦基岩</b>：主世界底部 / 下界顶底只生成 1 层基岩，可配置开关；仅影响新生成的区块。</li>
  *   <li><b>亮度上限扩展</b>：伽马滑块由原版 100% 放宽到 1000%，可按键开关，含 Sodium / Embeddium 兼容。</li>
  *   <li><b>上坡辅助</b>：可按键循环「关闭 / 上坡 / 自动跳跃」三模式，行走·潜行·疾跑三档高度可配置。</li>
+ *   <li><b>饱和度机制</b>：饱和度不被饥饿值封顶，饥饿满时进食可溢出转饱和度，HUD 显示读数。</li>
+ *   <li><b>望远镜改进</b>：不手持也能开镜，滚轮缩放并记住设置，可显示准星与倍数。</li>
+ *   <li><b>海洋之祝</b>：新增的三叉戟专属附魔，持有时解除激流的水 / 雨限制、引雷的雷雨天限制，并让穿刺的加伤对所有目标生效。</li>
  * </ul>
  *
  * <p>每一项都能在 {@code config/better_experience-common.toml} 里整体关闭（功能级总开关，玩家在
@@ -54,19 +58,22 @@ public class BetterExperience {
         modEventBus.addListener(this::commonSetup);
 
         // 服务端/世界机制集中在 COMMON 配置: config/better_experience-common.toml
-        context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, BetterExperienceServerConfig.SPEC);
 
         // 纯客户端偏好单独一份: config/better_experience-client.toml (望远镜缩放等)。
         // CLIENT 类型在专用服务器上不存在, 所以只在客户端注册, 避免服务端刷无意义的警告。
         if (FMLEnvironment.dist.isClient())
         {
-            context.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+            context.registerConfig(ModConfig.Type.CLIENT, BetterExperienceClientConfig.SPEC);
         }
 
         // 二段跳 / 鞘翅飞行开关 / 饱和度同步的网络通道（各一条）
         DoubleJumpNetwork.register();
         ElytraFlightNetwork.register();
         SaturationNetwork.register();
+
+        // 海洋之祝附魔（三叉戟专属，本 mod 唯一的注册表内容）
+        OceanBlessingEnchantments.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
 

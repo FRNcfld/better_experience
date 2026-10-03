@@ -12,49 +12,70 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 /**
  * 客户端配置, 生成在 {@code config/better_experience-client.toml}。
  *
- * <p>为什么单独一份、而不是塞进 {@link Config} 的 COMMON: 这里放的是<strong>客户端偏好</strong>
+ * <p>为什么单独一份、而不是塞进 {@link BetterExperienceServerConfig} 的 COMMON: 这里放的是<strong>客户端偏好</strong>
  * (缩放倍数、准星、覆盖层样式)。COMMON 配置在专用服务器上也存在, 把纯客户端偏好写进去语义不对;
  * 而 CLIENT 类型只在客户端加载、不参与同步, 正是这类设置该待的地方。
  *
- * <p>{@code spyglassZoom} 是唯一一个<strong>由游戏写回</strong>的项: 滚轮调完缩放后会把当前倍数存回来,
- * 下次启动直接恢复 (原模组的缩放值是静态字段, 不落盘)。
+ * <p>本类只有望远镜一组选项, 所以 TOML 里只有 {@code [spyglass]} 一个小节。
+ *
+ * <p><strong>分节约定</strong>: 小节用夹在字段之间的 {@code static} 块里的 {@code push()} / {@code pop()} 划分。
+ * 静态初始化按书写顺序执行, 因此 push 之后定义的项就归入该小节, pop 之后回到上一层;
+ * push 之前挂着的 {@code comment()} 会成为 TOML 里该小节的标题注释。
+ * 新增配置项时按所属小节就近插入即可; 新增小节则在它开头补 pop、结尾补 push。
+ *
+ * <p>配置项定义 / 运行时字段 / {@link #onLoad} 的读取这三处的顺序完全一致, 便于对照查找。
  */
 @Mod.EventBusSubscriber(modid = BetterExperience.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ClientConfig
+public class BetterExperienceClientConfig
 {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
+    // ==================== 望远镜 ====================
+    static
+    {
+        BUILDER.comment("望远镜改进: 不手持也能开镜、滚轮缩放并记住设置").push("spyglass");
+    }
+
     private static final ForgeConfigSpec.BooleanValue SPYGLASS_ENABLED = BUILDER
-            .comment("Master switch for the spyglass improvements feature")
+            .comment("望远镜改进功能的总开关",
+                     "关闭后滚轮缩放、准星、覆盖层等全部回到原版行为, 且玩家无法在游戏内重新打开")
             .define("spyglassEnabled", true);
 
     private static final ForgeConfigSpec.DoubleValue SPYGLASS_MAX_ZOOM = BUILDER
-            .comment("Maximum magnification while scoping. Vanilla is 10.0")
+            .comment("开镜时能达到的最大放大倍数。原版为 10.0")
             .defineInRange("spyglassMaxZoom", 10.0D, 1.0D, 10.0D);
 
     private static final ForgeConfigSpec.DoubleValue SPYGLASS_ZOOM_STEP = BUILDER
-            .comment("How much one scroll notch changes the zoom, as a proportion of the current zoom (0.1 = 10% per notch)")
+            .comment("滚轮每一格改变多少缩放, 取当前倍数的比例 (0.1 = 每格 10%)")
             .defineInRange("spyglassZoomStep", 0.1D, 0.01D, 1.0D);
 
     private static final ForgeConfigSpec.BooleanValue SPYGLASS_SHOW_CROSSHAIR = BUILDER
-            .comment("Whether to keep showing the crosshair while scoping. Vanilla shows it, so true keeps vanilla behaviour")
+            .comment("开镜时是否保留准星。原版会显示, 所以填 true 即原版表现")
             .define("spyglassShowCrosshair", true);
 
     private static final ForgeConfigSpec.BooleanValue SPYGLASS_SHOW_ZOOM_TEXT = BUILDER
-            .comment("Whether to show the current magnification in the spyglass view")
+            .comment("开镜时是否在准星下方显示当前放大倍数")
             .define("spyglassShowZoomText", true);
 
     private static final ForgeConfigSpec.BooleanValue SPYGLASS_SMOOTH_CAMERA = BUILDER
-            .comment("Slow the camera down proportionally to the magnification, for finer aiming while zoomed in")
+            .comment("是否按放大倍数同比放慢镜头移动, 便于放大后精细瞄准")
             .define("spyglassSmoothCamera", false);
 
     private static final ForgeConfigSpec.EnumValue<SpyglassOverlayStyle> SPYGLASS_OVERLAY = BUILDER
-            .comment("Spyglass overlay style. DEFAULT reuses the vanilla scope texture, NONE draws no overlay at all")
+            .comment("开镜覆盖层样式。DEFAULT = 沿用原版的望远镜贴图, NONE = 完全不画覆盖层")
             .defineEnum("spyglassOverlay", SpyglassOverlayStyle.DEFAULT);
 
+    /** 唯一一个由游戏写回的项, 见 {@link #persistZoom(double)}。 */
     private static final ForgeConfigSpec.DoubleValue SPYGLASS_ZOOM = BUILDER
-            .comment("Current magnification, written back by the game so it is remembered across restarts")
+            .comment("当前放大倍数, 由游戏在停止开镜时写回, 用来跨启动记住设置",
+                     "手改这里只会在下次开镜时被覆盖")
             .defineInRange("spyglassZoom", 10.0D, 1.0D, 10.0D);
+
+    // ==================== 收尾 ====================
+    static
+    {
+        BUILDER.pop();
+    }
 
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 

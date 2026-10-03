@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 import com.frnc.better_experience.spyglass.client.SpyglassZoom;
 
 import net.minecraft.client.Minecraft;
@@ -31,7 +31,7 @@ public abstract class SpyglassFovMixin
     @Inject(method = "getFieldOfViewModifier", at = @At("RETURN"), cancellable = true)
     private void betterExperience$applyZoom(CallbackInfoReturnable<Float> cir)
     {
-        if (!ClientConfig.spyglassEnabled) return;
+        if (!BetterExperienceClientConfig.spyglassEnabled) return;
 
         AbstractClientPlayer self = (AbstractClientPlayer) (Object) this;
         if (!Minecraft.getInstance().options.getCameraType().isFirstPerson()) return;

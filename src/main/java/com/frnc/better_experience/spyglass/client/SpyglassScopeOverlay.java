@@ -1,6 +1,6 @@
 package com.frnc.better_experience.spyglass.client;
 
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -36,7 +36,7 @@ public final class SpyglassScopeOverlay implements IGuiOverlay
     @Override
     public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int width, int height)
     {
-        if (!ClientConfig.spyglassEnabled || !ClientConfig.spyglassShowZoomText) return;
+        if (!BetterExperienceClientConfig.spyglassEnabled || !BetterExperienceClientConfig.spyglassShowZoomText) return;
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || !player.isScoping()) return;

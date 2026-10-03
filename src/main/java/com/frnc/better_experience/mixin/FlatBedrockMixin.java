@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -58,7 +58,7 @@ public abstract class FlatBedrockMixin
     @Inject(method = "falseAtAndAbove", at = @At("HEAD"), cancellable = true)
     private void betterExperience$flattenBedrockFloor(CallbackInfoReturnable<VerticalAnchor> cir)
     {
-        if (!Config.flatBedrockEnabled) return;
+        if (!BetterExperienceServerConfig.flatBedrockEnabled) return;
 
         if (BEDROCK_FLOOR.equals(this.randomName))
         {
@@ -70,7 +70,7 @@ public abstract class FlatBedrockMixin
     @Inject(method = "trueAtAndBelow", at = @At("HEAD"), cancellable = true)
     private void betterExperience$flattenBedrockRoof(CallbackInfoReturnable<VerticalAnchor> cir)
     {
-        if (!Config.flatBedrockEnabled) return;
+        if (!BetterExperienceServerConfig.flatBedrockEnabled) return;
 
         if (BEDROCK_ROOF.equals(this.randomName))
         {

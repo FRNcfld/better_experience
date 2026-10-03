@@ -8,13 +8,18 @@
         "defaultRequire": 1
     },
     "mixins": [
+        "EnchantmentHelperMixin",
         "FlatBedrockMixin",
         "FoodsMixin",
         "ItemMixin",
+        "LightningRodBlockMixin",
         "PlayerElytraFlightMixin",
         "SaturationCanEatMixin",
         "SaturationEffectMixin",
-        "SaturationFoodDataMixin"
+        "SaturationFoodDataMixin",
+        "ThrownTridentAccessor",
+        "ThrownTridentMixin",
+        "TridentItemMixin"
     ],
     "client": [
         "GammaLightTextureMixin",

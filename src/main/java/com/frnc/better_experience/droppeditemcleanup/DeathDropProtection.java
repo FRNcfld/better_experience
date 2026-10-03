@@ -1,6 +1,6 @@
 package com.frnc.better_experience.droppeditemcleanup;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.BetterExperience;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +27,7 @@ public class DeathDropProtection
     @SubscribeEvent
     public static void onLivingDrops(LivingDropsEvent event)
     {
-        if (!Config.cleanupProtectPlayerDeathDrops) return;
+        if (!BetterExperienceServerConfig.cleanupProtectPlayerDeathDrops) return;
         if (!(event.getEntity() instanceof Player player)) return;
 
         long gameTime = player.level().getGameTime();
@@ -40,7 +40,7 @@ public class DeathDropProtection
     /** 该掉落物是否处于死亡保护期内 */
     public static boolean isProtected(UUID entityUuid, long nowGameTime)
     {
-        int seconds = Config.cleanupPlayerDeathDropProtectionSeconds;
+        int seconds = BetterExperienceServerConfig.cleanupPlayerDeathDropProtectionSeconds;
         if (seconds <= 0) return false;
         Long start = PROTECTED_DROPS.get(entityUuid);
         return start != null && (nowGameTime - start) < seconds * 20L;
@@ -49,7 +49,7 @@ public class DeathDropProtection
     /** 清理已过保护期的记录, 避免 Map 无限增长 */
     public static void cleanupExpired(long nowGameTime)
     {
-        int seconds = Config.cleanupPlayerDeathDropProtectionSeconds;
+        int seconds = BetterExperienceServerConfig.cleanupPlayerDeathDropProtectionSeconds;
         if (seconds <= 0)
         {
             PROTECTED_DROPS.clear();

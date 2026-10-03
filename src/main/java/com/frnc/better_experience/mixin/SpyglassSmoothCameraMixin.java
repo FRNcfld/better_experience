@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 import com.frnc.better_experience.spyglass.client.SpyglassZoom;
 
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ public abstract class SpyglassSmoothCameraMixin
     @Inject(method = "turnPlayer", at = @At("HEAD"))
     private void betterExperience$scaleAimWhileZoomed(CallbackInfo ci)
     {
-        if (!ClientConfig.spyglassEnabled || !ClientConfig.spyglassSmoothCamera) return;
+        if (!BetterExperienceClientConfig.spyglassEnabled || !BetterExperienceClientConfig.spyglassSmoothCamera) return;
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || !player.isScoping()) return;

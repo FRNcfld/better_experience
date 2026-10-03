@@ -1,6 +1,6 @@
 package com.frnc.better_experience.saturation.client;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -50,7 +50,7 @@ public final class SaturationOverlay implements IGuiOverlay
     public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int width, int height)
     {
         // 客户端配置只决定"要不要显示"; 服务端那份决定实际机制是否生效
-        if (!Config.saturationEnabled || !Config.saturationShowHud) return;
+        if (!BetterExperienceServerConfig.saturationEnabled || !BetterExperienceServerConfig.saturationShowHud) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.gameMode == null) return;

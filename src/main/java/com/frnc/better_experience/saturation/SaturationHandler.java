@@ -1,7 +1,7 @@
 package com.frnc.better_experience.saturation;
 
 import com.frnc.better_experience.BetterExperience;
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.saturation.network.SaturationNetwork;
 import com.frnc.better_experience.saturation.network.SaturationSyncPacket;
 
@@ -50,7 +50,7 @@ public final class SaturationHandler
      */
     public static float maxExhaustion()
     {
-        int configured = Config.saturationMaxExhaustion;
+        int configured = BetterExperienceServerConfig.saturationMaxExhaustion;
         return configured > 0 ? (float) configured : Float.MAX_VALUE;
     }
 
@@ -60,7 +60,7 @@ public final class SaturationHandler
     {
         if (event.phase != TickEvent.Phase.END) return;
         if (!(event.player instanceof ServerPlayer player)) return;
-        if (!Config.saturationEnabled) return;
+        if (!BetterExperienceServerConfig.saturationEnabled) return;
 
         float saturation = player.getFoodData().getSaturationLevel();
         float exhaustion = player.getFoodData().getExhaustionLevel();

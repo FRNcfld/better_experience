@@ -1,6 +1,6 @@
 package com.frnc.better_experience.spyglass.client;
 
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 
 import net.minecraft.util.Mth;
 
@@ -20,7 +20,7 @@ import net.minecraft.util.Mth;
 public final class SpyglassZoom
 {
     /** 当前放大倍数 */
-    private static double zoom = ClientConfig.spyglassZoom;
+    private static double zoom = BetterExperienceClientConfig.spyglassZoom;
 
     /** 是否有未写回的改动 */
     private static boolean dirty;
@@ -50,12 +50,12 @@ public final class SpyglassZoom
      */
     public static void applyScroll(double scrollDelta, boolean discrete, double sensitivity)
     {
-        if (ClientConfig.spyglassMaxZoom <= 1.0D) return;   // 不允许缩放时滚轮无意义
+        if (BetterExperienceClientConfig.spyglassMaxZoom <= 1.0D) return;   // 不允许缩放时滚轮无意义
 
         double notches = (discrete ? Math.signum(scrollDelta) : scrollDelta) * sensitivity;
         if (notches == 0.0D) return;
 
-        double step = ClientConfig.spyglassZoomStep;
+        double step = BetterExperienceClientConfig.spyglassZoomStep;
         zoom = clamp(zoom * Math.pow(1.0D + step, notches));
         dirty = true;
     }
@@ -63,7 +63,7 @@ public final class SpyglassZoom
     /** 把当前倍数钳制进配置允许的区间 */
     private static double clamp(double value)
     {
-        return Mth.clamp(value, 1.0D, ClientConfig.spyglassMaxZoom);
+        return Mth.clamp(value, 1.0D, BetterExperienceClientConfig.spyglassMaxZoom);
     }
 
     /** 配置改动后重新钳制一次 (例如把最大倍数调小了) */
@@ -83,7 +83,7 @@ public final class SpyglassZoom
         if (!dirty) return false;
 
         dirty = false;
-        ClientConfig.persistZoom(zoom);
+        BetterExperienceClientConfig.persistZoom(zoom);
         return true;
     }
 }

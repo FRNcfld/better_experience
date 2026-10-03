@@ -1,6 +1,6 @@
 package com.frnc.better_experience.gamma;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 
 /**
  * 亮度 (伽马) 扩展的<strong>运行时开关</strong>。
@@ -31,7 +31,7 @@ public final class ExtendedGamma
     /** 原版亮度上限 (100%) */
     public static final double VANILLA_MAX_GAMMA = 1.0D;
 
-    private static boolean enabled = Config.extendedGammaEnabled;
+    private static boolean enabled = BetterExperienceServerConfig.extendedGammaEnabled;
 
     private ExtendedGamma()
     {

@@ -1,7 +1,7 @@
 package com.frnc.better_experience.spyglass.client;
 
 import com.frnc.better_experience.BetterExperience;
-import com.frnc.better_experience.ClientConfig;
+import com.frnc.better_experience.BetterExperienceClientConfig;
 import com.frnc.better_experience.spyglass.SpyglassState;
 import com.frnc.better_experience.spyglass.integration.SpyglassFinder;
 
@@ -44,7 +44,7 @@ public class KeyInputHandler
 
         boolean wasScoping = SpyglassState.isForcedScoping();
 
-        boolean scoping = ClientConfig.spyglassEnabled
+        boolean scoping = BetterExperienceClientConfig.spyglassEnabled
                 && mc.screen == null
                 && ClientHandler.USE_KEY.isDown()
                 && SpyglassFinder.hasSpyglass(player);

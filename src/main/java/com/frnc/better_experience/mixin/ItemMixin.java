@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.goldenapple.EnchantedGoldenAppleFoods;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -56,7 +56,7 @@ public abstract class ItemMixin
     @Inject(method = "getFoodProperties", at = @At("HEAD"), cancellable = true)
     private void betterExperience$useVanillaEnchantedGoldenAppleWhenDisabled(CallbackInfoReturnable<FoodProperties> cir)
     {
-        if (Config.enchantedGoldenAppleBuffEnabled) return;
+        if (BetterExperienceServerConfig.enchantedGoldenAppleBuffEnabled) return;
         // 只对附魔金苹果生效,其余物品一律交回原版逻辑
         if ((Object) this != Items.ENCHANTED_GOLDEN_APPLE) return;
         if (EnchantedGoldenAppleFoods.vanilla != null)

@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.saturation.SaturationHandler;
 
 import net.minecraft.world.entity.player.Player;
@@ -58,7 +58,7 @@ public abstract class SaturationFoodDataMixin
     @Inject(method = "eat(IF)V", at = @At("HEAD"), cancellable = true)
     private void betterExperience$eatWithOverflow(int foodLevelModifier, float saturationLevelModifier, CallbackInfo ci)
     {
-        if (!Config.saturationEnabled) return;
+        if (!BetterExperienceServerConfig.saturationEnabled) return;
 
         FoodData self = (FoodData) (Object) this;
 
@@ -71,7 +71,7 @@ public abstract class SaturationFoodDataMixin
         int overflow = foodLevel + foodLevelModifier - SaturationHandler.MAX_FOOD_LEVEL;
         if (overflow > 0)
         {
-            saturationGain += (float) overflow * (float) Config.saturationOverflowRatio;
+            saturationGain += (float) overflow * (float) BetterExperienceServerConfig.saturationOverflowRatio;
         }
 
         self.setFoodLevel(Math.min(foodLevel + foodLevelModifier, SaturationHandler.MAX_FOOD_LEVEL));
@@ -85,17 +85,17 @@ public abstract class SaturationFoodDataMixin
     @Inject(method = "tick(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"))
     private void betterExperience$clampSaturation(Player player, CallbackInfo ci)
     {
-        if (!Config.saturationEnabled) return;
+        if (!BetterExperienceServerConfig.saturationEnabled) return;
 
         FoodData self = (FoodData) (Object) this;
         float saturation = self.getSaturationLevel();
 
-        if (Config.saturationHungerLimitsSaturation)
+        if (BetterExperienceServerConfig.saturationHungerLimitsSaturation)
         {
             saturation = Math.min(saturation, (float) self.getFoodLevel());
         }
 
-        int cap = Config.saturationMaxSaturation;
+        int cap = BetterExperienceServerConfig.saturationMaxSaturation;
         saturation = Math.min(saturation, cap < 0 ? Float.MAX_VALUE : (float) cap);
 
         self.setSaturation(saturation);
@@ -106,7 +106,7 @@ public abstract class SaturationFoodDataMixin
             constant = @Constant(floatValue = 4.0F, ordinal = 0), require = 0)
     private float betterExperience$maxExhaustionCompare(float original)
     {
-        return Config.saturationEnabled ? SaturationHandler.maxExhaustion() : original;
+        return BetterExperienceServerConfig.saturationEnabled ? SaturationHandler.maxExhaustion() : original;
     }
 
     /** 消耗度扣减处的 4.0F (ordinal 1) */
@@ -114,6 +114,6 @@ public abstract class SaturationFoodDataMixin
             constant = @Constant(floatValue = 4.0F, ordinal = 1), require = 0)
     private float betterExperience$maxExhaustionDecrement(float original)
     {
-        return Config.saturationEnabled ? SaturationHandler.maxExhaustion() : original;
+        return BetterExperienceServerConfig.saturationEnabled ? SaturationHandler.maxExhaustion() : original;
     }
 }

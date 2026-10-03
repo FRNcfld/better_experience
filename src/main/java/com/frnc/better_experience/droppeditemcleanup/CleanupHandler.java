@@ -1,6 +1,6 @@
 package com.frnc.better_experience.droppeditemcleanup;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.BetterExperience;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +46,7 @@ public class CleanupHandler
         if (event.phase != TickEvent.Phase.END) return;
         MinecraftServer server = event.getServer();
         if (server == null) return;
-        if (!Config.cleanupEnabled) return;
+        if (!BetterExperienceServerConfig.cleanupEnabled) return;
 
         // 定期清理已过保护期的死亡掉落记录
         DeathDropProtection.cleanupExpired(server.overworld().getGameTime());
@@ -62,12 +62,12 @@ public class CleanupHandler
         else
         {
             elapsedTicks++;
-            int intervalTicks = Math.max(1, Config.cleanupIntervalSeconds) * TICKS_PER_SECOND;
+            int intervalTicks = Math.max(1, BetterExperienceServerConfig.cleanupIntervalSeconds) * TICKS_PER_SECOND;
 
             // 清理前预警: 剩余时间恰等于 cleanupWarningSeconds 时广播一次
-            int warningSeconds = Config.cleanupWarningSeconds;
+            int warningSeconds = BetterExperienceServerConfig.cleanupWarningSeconds;
             if (warningSeconds > 0
-                    && warningSeconds < Config.cleanupIntervalSeconds
+                    && warningSeconds < BetterExperienceServerConfig.cleanupIntervalSeconds
                     && elapsedTicks == intervalTicks - warningSeconds * TICKS_PER_SECOND)
             {
                 server.getPlayerList().broadcastSystemMessage(
@@ -100,7 +100,7 @@ public class CleanupHandler
     private static void processBatch()
     {
         int batch = 0;
-        while (batch < Config.cleanupMaxItemsPerBatch && !pendingItems.isEmpty())
+        while (batch < BetterExperienceServerConfig.cleanupMaxItemsPerBatch && !pendingItems.isEmpty())
         {
             ItemEntity item = pendingItems.poll();
             if (item != null && item.isAlive() && shouldRemove(item))
@@ -115,11 +115,11 @@ public class CleanupHandler
     /** 维度过滤: 黑名单命中→清理; 白名单命中→跳过; 默认→清理 */
     private static boolean shouldCleanDimension(ResourceLocation dimensionId)
     {
-        if (Config.cleanupDimensionBlacklistEnable && CleanupLists.isDimensionBlacklisted(dimensionId))
+        if (BetterExperienceServerConfig.cleanupDimensionBlacklistEnable && CleanupLists.isDimensionBlacklisted(dimensionId))
         {
             return true;
         }
-        if (Config.cleanupDimensionWhitelistEnable && CleanupLists.isDimensionWhitelisted(dimensionId))
+        if (BetterExperienceServerConfig.cleanupDimensionWhitelistEnable && CleanupLists.isDimensionWhitelisted(dimensionId))
         {
             return false;
         }
@@ -132,28 +132,28 @@ public class CleanupHandler
         ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item.getItem().getItem());
 
         // 物品白名单 → 受保护 (命中即免清理)
-        if (Config.cleanupItemWhitelistEnable && itemId != null && CleanupLists.isItemWhitelisted(itemId))
+        if (BetterExperienceServerConfig.cleanupItemWhitelistEnable && itemId != null && CleanupLists.isItemWhitelisted(itemId))
         {
             return false;
         }
         // 物品黑名单 → 必须清理 (命中即清, 无视后续保护)
-        if (Config.cleanupItemBlacklistEnable && itemId != null && CleanupLists.isItemBlacklisted(itemId))
+        if (BetterExperienceServerConfig.cleanupItemBlacklistEnable && itemId != null && CleanupLists.isItemBlacklisted(itemId))
         {
             return true;
         }
         // 命名物品保护
-        if (Config.cleanupProtectNamedItems && item.hasCustomName())
+        if (BetterExperienceServerConfig.cleanupProtectNamedItems && item.hasCustomName())
         {
             return false;
         }
         // 新鲜掉落保护
-        int minAgeTicks = Math.max(0, Config.cleanupMinimumItemAgeSeconds) * TICKS_PER_SECOND;
+        int minAgeTicks = Math.max(0, BetterExperienceServerConfig.cleanupMinimumItemAgeSeconds) * TICKS_PER_SECOND;
         if (item.tickCount < minAgeTicks)
         {
             return false;
         }
         // 死亡掉落保护
-        if (Config.cleanupProtectPlayerDeathDrops
+        if (BetterExperienceServerConfig.cleanupProtectPlayerDeathDrops
                 && DeathDropProtection.isProtected(item.getUUID(), item.level().getGameTime()))
         {
             return false;
@@ -166,7 +166,7 @@ public class CleanupHandler
     {
         cleaning = false;
         long durationMs = System.currentTimeMillis() - cleanupStartTimeMillis;
-        if (Config.cleanupBroadcastResult && totalRemoved > 0)
+        if (BetterExperienceServerConfig.cleanupBroadcastResult && totalRemoved > 0)
         {
             server.getPlayerList().broadcastSystemMessage(
                     Component.translatable("message.better_experience.cleanup_result",

@@ -1,7 +1,7 @@
 package com.frnc.better_experience.stepassist.client;
 
 import com.frnc.better_experience.BetterExperience;
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.stepassist.StepAssistHandler;
 import com.frnc.better_experience.stepassist.StepAssistMode;
 
@@ -26,7 +26,7 @@ public class KeyInputHandler
         if (mc.player == null || mc.screen != null) return;
 
         // 功能被配置整体关闭时按键不做任何事——此时回显模式名只会误导玩家
-        if (!Config.stepAssistEnabled) return;
+        if (!BetterExperienceServerConfig.stepAssistEnabled) return;
 
         if (!ClientHandler.CYCLE_KEY.consumeClick()) return;
 

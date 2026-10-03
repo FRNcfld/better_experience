@@ -1,6 +1,6 @@
 package com.frnc.better_experience.mixin;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.saturation.SaturationHandler;
 
 import net.minecraft.world.effect.MobEffect;
@@ -40,7 +40,7 @@ public abstract class SaturationEffectMixin
             at = @At("HEAD"), cancellable = true)
     private void betterExperience$saturationEffectDecay(LivingEntity entity, int amplifier, CallbackInfo ci)
     {
-        if (!Config.saturationEnabled) return;
+        if (!BetterExperienceServerConfig.saturationEnabled) return;
         if ((Object) this != MobEffects.SATURATION) return;   // 只接管饱和效果
         if (entity.level().isClientSide()) return;            // 效果由服务端施加
         if (!(entity instanceof Player player)) return;
@@ -52,7 +52,7 @@ public abstract class SaturationEffectMixin
         if (saturation > SaturationHandler.SATURATION_SOFT_CAP)
         {
             float base = saturation >= 100.0F ? saturation : saturation - 19.0F;
-            int rate = Math.abs(Config.saturationEffectDecayRate);
+            int rate = Math.abs(BetterExperienceServerConfig.saturationEffectDecayRate);
             float gain = (amount * 2.0F) / (float) Math.pow(base, rate);
             foodData.setSaturation(saturation + gain);
         }

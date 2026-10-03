@@ -1,6 +1,6 @@
 package com.frnc.better_experience.doublejump;
 
-import com.frnc.better_experience.Config;
+import com.frnc.better_experience.BetterExperienceServerConfig;
 import com.frnc.better_experience.BetterExperience;
 import com.frnc.better_experience.doublejump.network.DoubleJumpNetwork;
 import com.frnc.better_experience.doublejump.network.DoubleJumpStatePacket;
@@ -44,7 +44,7 @@ public class JumpHandler
 
     public static void initFromConfig()
     {
-        defaultEnabled = Config.doubleJumpEnabled;
+        defaultEnabled = BetterExperienceServerConfig.doubleJumpEnabled;
         LOGGER.info("[better_experience] 二段跳默认状态: {}", defaultEnabled);
     }
 
@@ -56,14 +56,14 @@ public class JumpHandler
      */
     public static boolean isDoubleJumpEnabled(Player player)
     {
-        if (!Config.doubleJumpFeatureEnabled) return false;
+        if (!BetterExperienceServerConfig.doubleJumpFeatureEnabled) return false;
         return enabledByPlayer.getOrDefault(player.getUUID(), defaultEnabled);
     }
 
     /** 服务端: 切换该玩家的二段跳开关, 返回切换后的新状态 (功能被总开关关闭时恒为 false) */
     public static boolean toggleDoubleJump(Player player)
     {
-        if (!Config.doubleJumpFeatureEnabled)
+        if (!BetterExperienceServerConfig.doubleJumpFeatureEnabled)
         {
             LOGGER.info("[better_experience] 二段跳功能已被配置关闭, 忽略玩家 {} 的切换请求", player.getName().getString());
             return false;
