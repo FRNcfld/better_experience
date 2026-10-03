@@ -178,9 +178,11 @@ public class BetterExperienceServerConfig
     }
 
     private static final ForgeConfigSpec.BooleanValue EXTENDED_GAMMA_ENABLED = BUILDER
-            .comment("亮度 (伽马) 滑块上限是否由原版 100% 放宽到 1000%",
-                     "关闭时按原版亮度渲染 (滑块仍能拖动, 只是不生效)",
-                     "需要重启游戏才生效")
+            .comment("亮度 (伽马) 上限是否由原版 100% 放宽到 1000%",
+                     "本项只决定游戏内开关的初值, 改动需要重启游戏才生效; 游戏内可用热键随时切换开关与调整数值",
+                     "关闭时按原版亮度渲染 (值仍能调整, 只是不生效)",
+                     "Sodium / Rubidium / Embeddium 的视频设置界面里亮度滑块仍是 0-100%"
+                             + " (本模组不修改任何界面类), 那些环境用「调整亮度」热键 (按住 + 滚轮) 调值")
             .define("extendedGammaEnabled", true);
 
     // ==================== 饱和度机制 ====================

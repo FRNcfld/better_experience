@@ -18,9 +18,11 @@ import java.util.Optional;
  * 1000%、照样把值存进 options.txt, 只是那个值不参与渲染 (由 {@link ExtendedGamma#effectiveGamma}
  * 在渲染读取处决定)。这样开关来回切不会影响玩家调好的值。
  *
- * <p>{@link #codec()} 与 {@link OptionInstance.UnitDouble} 的写法保持一致 (只是把范围换成 0–10),
- * 用 {@code either(doubleRange, BOOL)} 兼容早期版本写在 options.txt 里的布尔亮度值
- * ({@code true} 视作满亮度), 否则读旧配置会解析失败。
+ * <p>{@link #codec()} 沿用 {@link OptionInstance.UnitDouble} 的写法 (只是把范围换成 0–10):
+ * 用 {@code either(doubleRange, BOOL)} 兼容早期版本写在 options.txt 里的布尔亮度值, 否则读旧配置会解析失败。
+ * 布尔那一支<strong>与参考实现 (GJEB) 一致</strong>地把 {@code true} 当作<strong>满亮度 10.0 (1000%)</strong>:
+ * 原版 {@code UnitDouble} 那里给的是 1.0 (100%), 但本功能的"满"已经变成 1000%,
+ * 沿用 1.0 会让 {@code true} 反而表示"调到原版最亮", 语义上说不通。
  *
  * <p><strong>注意</strong>: {@code OptionInstance.SliderableValueSet} 在原版里是包级私有,
  * 本类实现它依赖 {@code META-INF/accesstransformer.cfg} 里的 AT (来源模组也是这么做的)。
@@ -63,7 +65,7 @@ public final class ExtendedGammaValueSet implements OptionInstance.SliderableVal
     public Codec<Double> codec()
     {
         return Codec.either(Codec.doubleRange(0.0D, MAX_GAMMA), Codec.BOOL).xmap(
-                either -> either.map(value -> value, enabled -> enabled ? 1.0D : 0.0D),
+                either -> either.map(value -> value, enabled -> enabled ? MAX_GAMMA : 0.0D),
                 Either::left);
     }
 }
