@@ -26,5 +26,7 @@
     "advancements.better_experience.use_ega.title": "Reign Supreme in the World",
     "advancements.better_experience.use_ega.description": "Eat an Enchanted Golden Apple",
     "enchantment.better_experience.ocean_blessing": "Ocean's Blessing",
-    "enchantment.better_experience.ocean_blessing.desc": "Lifts the water / weather requirements of Riptide and Channeling on this trident,\nand makes Impaling's bonus damage apply to any mob"
+    "enchantment.better_experience.ocean_blessing.desc": "Lifts the water / weather requirements of Riptide and Channeling on this trident,\nand makes Impaling's bonus damage apply to any mob",
+    "enchantment.better_experience.chunk_devourer": "Chunk Devourer",
+    "enchantment.better_experience.chunk_devourer.desc": "Diamond pickaxe or better only.\nMining a block deletes the whole area of chunks around the chunk it is in:\nlevel 1 = 1 chunk, level 2 = 3x3 (9), level 3 = 5x5 (25).\nThe area spans from the world bottom up to the build limit; only the column under you is kept."
 }

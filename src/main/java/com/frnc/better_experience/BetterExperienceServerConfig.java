@@ -1,5 +1,6 @@
 package com.frnc.better_experience;
 
+import com.frnc.better_experience.chunkdevourer.ChunkDevourerToolCost;
 import com.frnc.better_experience.stepassist.StepAssistMode;
 
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -19,9 +20,9 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
  * push 之前挂着的 {@code comment()} 会成为 TOML 里该小节的标题注释。
  * 新增配置项时按所属小节就近插入即可；新增小节则在它开头补 pop、结尾补 push。
  *
- * <p>本类按功能分 9 个小节：{@code [double_jump]}、{@code [elytra_flight]}、{@code [step_assist]}、
+ * <p>本类按功能分 10 个小节：{@code [double_jump]}、{@code [elytra_flight]}、{@code [step_assist]}、
  * {@code [item_cleanup]}、{@code [enchanted_golden_apple]}、{@code [flat_bedrock]}、
- * {@code [extended_gamma]}、{@code [saturation]}、{@code [ocean_blessing]}。
+ * {@code [extended_gamma]}、{@code [saturation]}、{@code [ocean_blessing]}、{@code [chunk_devourer]}。
  * 每个功能的总开关都是该小节的第一项。
  *
  * <p>配置项定义 / 运行时字段 / {@link #onLoad} 的读取这三处的顺序完全一致，便于对照查找。
@@ -243,6 +244,58 @@ public class BetterExperienceServerConfig
                      "注意: 激流与引雷在原版互斥, 同一把三叉戟只能二选一, 因此这两个效果不会同时生效")
             .define("oceanBlessingEnabled", true);
 
+    // ==================== 区块吞噬者 ====================
+    static
+    {
+        BUILDER.pop().comment("区块吞噬者: 钻石镐及以上专属附魔, 挖方块时删除以它所在区块为中心的一整片区块").push("chunk_devourer");
+    }
+
+    private static final ForgeConfigSpec.BooleanValue CHUNK_DEVOURER_ENABLED = BUILDER
+            .comment("区块吞噬者附魔功能的总开关",
+                     "关闭后此附魔不再有任何效果, 挖方块就是普通挖方块",
+                     "已经排进队列、正在删的任务会被立刻中止 (不会留一个跑到一半的任务占着内存)",
+                     "附魔本身与其附魔书仍然存在 (创造模式原材料页里照常能取到), 只是不再触发")
+            .define("chunkDevourerEnabled", true);
+
+    private static final ForgeConfigSpec.BooleanValue CHUNK_DEVOURER_DROPS_ITEMS = BUILDER
+            .comment("被吞噬的方块是否掉落物品与经验",
+                     "false (默认) = 单纯删除, 什么都不掉也不给经验, 符合「吞噬」的定位",
+                     "true = 按原版规则掉落, 时运 / 精准采集照常生效, 经验照常给",
+                     "注意: 3 级一次约 86 万格方块, 打开后会一次刷出海量掉落物与实体, 谨慎使用")
+            .define("chunkDevourerDropsItems", false);
+
+    private static final ForgeConfigSpec.EnumValue<ChunkDevourerToolCost> CHUNK_DEVOURER_TOOL_COST = BUILDER
+            .comment("触发一次所付出的工具代价",
+                     "DESTROY_TOOL (默认) = 直接把镐子损毁, 也就是一把镐换一次; 此项无视耐久附魔",
+                     "SINGLE_DURABILITY = 不论删了多少格, 整次操作只扣 1 点耐久 (耐久附魔可豁免)",
+                     "两种都不按格扣耐久: 按格扣的话 5×5 一次要多扣约 86 万点, 任何镐子都是秒碎",
+                     "创造模式两种都不消耗耐久 (与原版一致)")
+            .defineEnum("chunkDevourerToolCost", ChunkDevourerToolCost.DESTROY_TOOL);
+
+    private static final ForgeConfigSpec.IntValue CHUNK_DEVOURER_BLOCKS_PER_TICK = BUILDER
+            .comment("每 tick 最多删除多少格方块, 用来把负载摊到多个 tick, 避免服务端卡死",
+                     "等级 1 (1 个区块) 约 3.5 万格, 等级 2 (9 个) 约 31 万格, 等级 3 (25 个) 约 86 万格",
+                     "按默认 4096 算: 等级 1 约需几 tick, 等级 3 约需 10 秒",
+                     "调小更平滑但更慢, 调大更快但每 tick 的卡顿更明显")
+            .defineInRange("chunkDevourerBlocksPerTick", 4096, 1, 65536);
+
+    private static final ForgeConfigSpec.BooleanValue CHUNK_DEVOURER_KEEP_PLAYER_COLUMN = BUILDER
+            .comment("是否保留触发者脚下那一列 (1×1, 整列从世界底部到建筑上限) 不删",
+                     "默认 true 是为了让玩家有个落脚点",
+                     "改成 false 就是字面意义的「整个区块」: 连脚下一起删到世界底部,",
+                     "而世界底部之下没有方块, 玩家会直接掉进虚空摔死 —— 除非开着创造 / 鞘翅 / 缓降")
+            .define("chunkDevourerKeepPlayerColumn", true);
+
+    private static final ForgeConfigSpec.IntValue CHUNK_DEVOURER_BARTER_WEIGHT = BUILDER
+            .comment("猪灵交易出这本附魔书的权重 (交易只出 1 级书, 2 / 3 级必须靠铁砧合并)",
+                     "原版猪灵交易表只有一个池、18 个条目, 权重合计 459",
+                     "本项表示「相当于往原版池里塞一个权重为 N 的条目」, 命中率 = N / (459 + N)",
+                     "默认 20 约为 4.2%, 也就是平均约 24 次交易出一本",
+                     "参考: 原版表里最常见的条目权重是 40 (约 8%), 最稀有的附魔书 (灵魂疾行) 是 5 (约 1.1%)",
+                     "一把 3 级镐要 4 本 1 级书 (1+1=2, 1+1=2, 2+2=3), 而镐子每触发一次就损毁,",
+                     "所以这个值给得比一般的稀有附魔宽松; 调到 459 则每次必出, 方便调试")
+            .defineInRange("chunkDevourerBarterWeight", 20, 1, 459);
+
     // ==================== 收尾 ====================
     static
     {
@@ -316,6 +369,16 @@ public class BetterExperienceServerConfig
     // 只在配置加载之后才会被读到 (玩家使用三叉戟时、构建创造模式标签页时), 所以按上面的规则留空
     public static boolean oceanBlessingEnabled;
 
+    // ---- 区块吞噬者 ----
+    // 破坏方块的事件处理器在游戏跑起来之后才读它们, 但队列是静态的、也读配置, 保持一致更安全,
+    // 因此初值仍与配置文件默认值一致, 不依赖 onLoad
+    public static boolean chunkDevourerEnabled = true;
+    public static boolean chunkDevourerDropsItems = false;
+    public static ChunkDevourerToolCost chunkDevourerToolCost = ChunkDevourerToolCost.DESTROY_TOOL;
+    public static int chunkDevourerBlocksPerTick = 4096;
+    public static boolean chunkDevourerKeepPlayerColumn = true;
+    public static int chunkDevourerBarterWeight = 20;
+
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
@@ -357,5 +420,11 @@ public class BetterExperienceServerConfig
         saturationEffectDecayRate = SATURATION_EFFECT_DECAY_RATE.get();
         saturationShowHud = SATURATION_SHOW_HUD.get();
         oceanBlessingEnabled = OCEAN_BLESSING_ENABLED.get();
+        chunkDevourerEnabled = CHUNK_DEVOURER_ENABLED.get();
+        chunkDevourerDropsItems = CHUNK_DEVOURER_DROPS_ITEMS.get();
+        chunkDevourerToolCost = CHUNK_DEVOURER_TOOL_COST.get();
+        chunkDevourerBlocksPerTick = CHUNK_DEVOURER_BLOCKS_PER_TICK.get();
+        chunkDevourerKeepPlayerColumn = CHUNK_DEVOURER_KEEP_PLAYER_COLUMN.get();
+        chunkDevourerBarterWeight = CHUNK_DEVOURER_BARTER_WEIGHT.get();
     }
 }

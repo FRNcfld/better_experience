@@ -24,6 +24,7 @@
 | **饱和度机制** | 饱和度不再被饥饿值封顶；饥饿满时进食，多出的营养按比例（默认 1:1，可配）转成饱和度；可无限进食；HUD 显示饱和度与消耗度 | 服务端权威 |
 | **望远镜改进** | 望远镜放在**饰品栏**（Curios，可选）或背包里也能按键使用；滚轮调整放大（默认最大 10 倍，可配）并**记住**设置；开镜时显示准星与放大倍数 | 纯客户端 |
 | **海洋之祝附魔** | 新增的**三叉戟专属**附魔（宝藏附魔）：带它时**激流**不再要求水中/雨中，**引雷**不再要求雷雨天，**穿刺**的加伤对所有生物生效 | 双端 |
+| **区块吞噬者附魔** | 新增的**钻石镐及以上专属**附魔，**只能靠猪灵交易**得到（且只出 **1 级**书，2 / 3 级靠铁砧合并）：挖方块时删除以该方块所在区块为中心的一整片区块（1 级 1 个 / 2 级 3×3 共 9 个 / 3 级 5×5 共 25 个），从世界底部删到建筑上限，只保留你脚下那一列。删除按 tick 分摊，默认不掉落物品，代价是触发一次损毁一把镐 | 服务端 |
 
 ## 热键
 
@@ -44,7 +45,7 @@
 
 配置文件有两份（首次启动后生成），都**按功能分小节**，小节名就是功能名，且每个小节的**第一项都是该功能的总开关**：
 
-- `config/better_experience-common.toml` —— 服务端 / 世界机制。小节：`[double_jump]`、`[elytra_flight]`、`[step_assist]`、`[item_cleanup]`、`[enchanted_golden_apple]`、`[flat_bedrock]`、`[extended_gamma]`、`[saturation]`、`[ocean_blessing]`
+- `config/better_experience-common.toml` —— 服务端 / 世界机制。小节：`[double_jump]`、`[elytra_flight]`、`[step_assist]`、`[item_cleanup]`、`[enchanted_golden_apple]`、`[flat_bedrock]`、`[extended_gamma]`、`[saturation]`、`[ocean_blessing]`、`[chunk_devourer]`
 - `config/better_experience-client.toml` —— 纯客户端偏好（望远镜的缩放倍数、准星、覆盖层样式等）。小节：`[spyglass]`。其中 `spyglass.spyglassZoom` 是**由游戏写回**的：滚轮调完缩放后会记住，下次启动直接恢复
 
 **每一项功能都有独立的总开关，默认全部开启。** 总开关关闭时该项功能被整体禁用，玩家在游戏内**无法**重新打开。此外还有若干数值可调，例如：
@@ -52,6 +53,11 @@
 - `step_assist.stepAssistMode` / `step_assist.stepAssistStepHeight` / `step_assist.stepAssistSneakHeight` / `step_assist.stepAssistSprintHeight` — 上坡辅助的初始档位与三档高度
 - `item_cleanup.cleanupIntervalSeconds` / `item_cleanup.cleanupWarningSeconds` — 掉落物清理的间隔与预警时间
 - `item_cleanup.cleanupItemBlacklistEnable` 等四个开关 — 黑白名单是否生效，名单本身在数据包里（`data/better_experience/dropped_item_cleanup/`）
+- `chunk_devourer.chunkDevourerBlocksPerTick` — 区块吞噬者每 tick 最多删多少格（默认 4096）。等级 1 约 3.5 万格、等级 3 约 86 万格，所以默认配置下等级 1 几 tick 完成、等级 3 约 10 秒；调小更平滑、调大更快但更卡
+- `chunk_devourer.chunkDevourerDropsItems` — 被吞噬的方块是否掉落（默认 `false`，纯删除，也不给经验；打开后时运 / 精准采集照常生效，但一次会刷出海量掉落物）
+- `chunk_devourer.chunkDevourerToolCost` — 工具代价，默认 `DESTROY_TOOL`（一把镐换一次，**无视耐久附魔**——否则耐久 III 有 3/4 概率豁免掉那点损耗，镐子不碎而是停在只剩 1 点耐久），可改成 `SINGLE_DURABILITY`（整次只扣 1 点，走原版损耗，耐久附魔可豁免）。**创造模式两种都不消耗耐久**（与原版一致）
+- `chunk_devourer.chunkDevourerKeepPlayerColumn` — 是否保留脚下那一列（默认 `true`）。**改成 `false` 就是字面意义的「整个区块」：连脚下一起删到世界底部，而世界底部之下没有方块，你会直接掉进虚空摔死**
+- `chunk_devourer.chunkDevourerBarterWeight` — 猪灵交易出书的权重（默认 **20**，约 4.2%，平均约 24 次交易一本）。参考：原版该表里最常见的条目权重是 40（约 8%），最稀有的附魔书（灵魂疾行）是 5。**交易只出 1 级书**，而一把 3 级镐要 4 本（1+1=2，1+1=2，2+2=3）、且镐子每触发一次就损毁，所以默认给得比一般稀有附魔宽松；调到 459 则每次必出，方便调试
 
 > **升级提示**：配置项现在带小节前缀（如原来的 `cleanupIntervalSeconds` 现在是 `item_cleanup.cleanupIntervalSeconds`）。直接覆盖更新旧版本时，Forge 会按新结构补全文件，旧文件里不带前缀的那些值不会自动迁移，会回到默认值，需要重新设一遍。
 
@@ -70,7 +76,14 @@
 - **激流与引雷在原版就是互斥的**（`isCompatibleWith` 双向判定，铁砧也合不上），本模组**没有**解除这层互斥。所以「海洋之祝 + 激流」与「海洋之祝 + 引雷」是两个独立组合，同一把三叉戟上只能生效其中一个效果。
 - **穿刺的加伤**改成对任意目标都算，因此带海洋之祝的三叉戟在物品提示里「主手伤害」也会跟着变高——这不是显示错误，此时那个加成本来就对所有生物生效。
 - **引雷有两条落雷路径**，都已被海洋之祝覆盖：命中生物时在生物脚下落雷，命中**避雷针方块**时在避雷针处落雷。所以晴天带海洋之祝也能直接打避雷针制造雷击。
-- 附魔描述已按惯例写进语言文件（`enchantment.better_experience.ocean_blessing.desc`），但**原版不渲染附魔描述**，需要安装 Enchantment Descriptions 之类的模组才会显示。
+- 附魔描述已按惯例写进语言文件（`enchantment.better_experience.ocean_blessing.desc`），但**原版不渲染附魔描述**，需要安装 Enchantment Descriptions 之类的模组才会显示。区块吞噬者同理（`enchantment.better_experience.chunk_devourer.desc`）。
+- **区块吞噬者只能由猪灵交易得到，而且交易只出 1 级书**：附魔台刷不出、村民不卖、战利品箱与钓鱼也不会出（靠 `isTreasureOnly` / `isDiscoverable` / `isTradeable` 三个开关一起挡住）。**2 级 / 3 级必须靠铁砧合出来**——两本 1 级合 2 级，两本 2 级合 3 级，所以一把 3 级镐要 4 本 1 级书（镐子又每触发一次就损毁，是消耗品）。
+- **区块吞噬者只认钻石镐及以上**（等级判定取 `Tier#getLevel() >= Tiers.DIAMOND`，所以**金镐不行**——金在原版是 0 级）。铁砧把附魔书打到**铁镐**上是合不出结果的；但"书 + 书"合并升级那一支不受影响（原版 `AnvilMenu` 对书物强制放行判定）。创造模式仍可无视这道限制，那是原版 `instabuild` 的既有行为。
+- **区块吞噬者只影响已加载的区块。** 玩家周围本来就在加载范围内，但贴着加载边界挖时，够不到的区块会被跳过（不会为了它去同步加载 / 生成地形，那才是真的卡服）。
+- **删除不触发邻接更新**（与 `/fill ... air` 同一机制）：水不会流进来、悬空的方块也不会掉。海底被挖出的空洞会留下一堵"立着的水墙"。
+- **删除范围包含基岩**：整列从世界底部删到建筑上限，所以那片区域的世界底部是空的。掉下去的实体会摔出世界。
+- **保留的只是触发者自己脚下那一列**，范围里其他玩家 / 生物不会被保护；3 级时范围达 400×400 格，**不要在自己的基地附近用**。
+- 同一个维度同时只跑一个任务（后来的人排队等）。默认配置下镐子触发一次就损毁，本来也触发不了第二次。
 
 ## 构建
 
@@ -97,6 +110,7 @@
 | 饱和度机制 | [Saturation Plus](https://www.curseforge.com/minecraft/mc-mods/saturation-plus)（MrKirbychu） | CC0-1.0 |
 | 望远镜改进 | [Spyglass Improvements](https://github.com/juancarloscp52/spyglass-improvements)（juancarloscp52） | GPL-3.0 |
 | 海洋之祝 | 本模组原创（未移植任何模组） | — |
+| 区块吞噬者 | 本模组原创（未移植任何模组） | — |
 
 移植时依照本模组的既有约定做了重写（配置改为 Forge 配置项、提示改为动作栏、热键默认不绑定等），并非原样搬运。
 

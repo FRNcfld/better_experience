@@ -26,5 +26,7 @@
     "advancements.better_experience.use_ega.title": "君临天下",
     "advancements.better_experience.use_ega.description": "吃下一个附魔金苹果",
     "enchantment.better_experience.ocean_blessing": "海洋之祝",
-    "enchantment.better_experience.ocean_blessing.desc": "解除本三叉戟上激流的水 / 雨限制与引雷的雷雨天限制，\n并让穿刺的加伤对所有生物生效"
+    "enchantment.better_experience.ocean_blessing.desc": "解除本三叉戟上激流的水 / 雨限制与引雷的雷雨天限制，\n并让穿刺的加伤对所有生物生效",
+    "enchantment.better_experience.chunk_devourer": "区块吞噬者",
+    "enchantment.better_experience.chunk_devourer.desc": "钻石镐及以上专属。\n挖掘方块时，删除以该方块所在区块为中心的一整片区块：\n1 级 1 个区块，2 级 3×3 共 9 个，3 级 5×5 共 25 个；\n范围自世界底部至建筑上限，只保留你脚下那一列。"
 }

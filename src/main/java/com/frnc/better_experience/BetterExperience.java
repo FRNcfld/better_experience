@@ -1,5 +1,6 @@
 package com.frnc.better_experience;
 
+import com.frnc.better_experience.chunkdevourer.ChunkDevourerEnchantments;
 import com.frnc.better_experience.doublejump.JumpHandler;
 import com.frnc.better_experience.doublejump.network.DoubleJumpNetwork;
 import com.frnc.better_experience.elytraflight.network.ElytraFlightNetwork;
@@ -35,6 +36,9 @@ import org.slf4j.Logger;
  *   <li><b>饱和度机制</b>：饱和度不被饥饿值封顶，饥饿满时进食可溢出转饱和度，HUD 显示读数。</li>
  *   <li><b>望远镜改进</b>：不手持也能开镜，滚轮缩放并记住设置，可显示准星与倍数。</li>
  *   <li><b>海洋之祝</b>：新增的三叉戟专属附魔，持有时解除激流的水 / 雨限制、引雷的雷雨天限制，并让穿刺的加伤对所有目标生效。</li>
+ *   <li><b>区块吞噬者</b>：新增的钻石镐及以上专属附魔（仅猪灵交易产出 1 级书，2 / 3 级靠铁砧合并），
+ *       挖方块时删除以它所在区块为中心的一整片区块，1 级 1 个 / 2 级 9 个 / 3 级 25 个；
+ *       删除按 tick 分摊，保留玩家脚下那一列。</li>
  * </ul>
  *
  * <p>每一项都能在 {@code config/better_experience-common.toml} 里整体关闭（功能级总开关，玩家在
@@ -73,8 +77,10 @@ public class BetterExperience {
         ElytraFlightNetwork.register();
         SaturationNetwork.register();
 
-        // 海洋之祝附魔（三叉戟专属，本 mod 唯一的注册表内容）
+        // 本 mod 的两个附魔：海洋之祝（三叉戟专属）与区块吞噬者（镐子专属，仅猪灵交易产出）。
+        // 各自带一个 DeferredRegister，同一个注册表挂两次互不影响。
         OceanBlessingEnchantments.register(modEventBus);
+        ChunkDevourerEnchantments.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
 
