@@ -19,6 +19,7 @@
 | **掉落物定时清理** | 定时清理掉落物；支持维度 / 物品黑白名单，以及命名物品、新鲜掉落、玩家死亡掉落的保护 | 服务端 |
 | **附魔金苹果强化** | 生命恢复 V 级 60 秒、抗性提升 III 级、伤害吸收 V 级、营养 10 / 饱和度满 | 双端（全局） |
 | **平坦基岩** | 主世界底部与下界顶/底只生成 1 层基岩，取代原版的 1–5 层锯齿状 | 服务端（世界生成） |
+| **世界高度覆盖** | 按维度改写世界的可用高度范围（下限 + 上限），数值写在数据包里；只改变可用空间、不改地形生成范围，且**只对新世界有效** | 服务端（世界生成） |
 | **亮度扩展** | 亮度（伽马）上限由原版 100% 放宽到 **1000%**；用原版滑块或「按住 + 滚轮」热键调整。Sodium / Rubidium / Embeddium 的界面滑块仍只有 0–100%（本模组不改任何界面类），那些环境用热键 | 纯客户端 |
 | **上坡辅助** | 可直接走上整格方块；按键在「关闭 / 上坡 / 自动跳跃」三档间循环，行走·潜行·疾跑三档高度可调 | 纯客户端 |
 | **饱和度机制** | 饱和度不再被饥饿值封顶；饥饿满时进食，多出的营养按比例（默认 1:1，可配）转成饱和度；可无限进食；HUD 显示饱和度与消耗度 | 服务端权威 |
@@ -45,7 +46,7 @@
 
 配置文件有两份（首次启动后生成），都**按功能分小节**，小节名就是功能名，且每个小节的**第一项都是该功能的总开关**：
 
-- `config/better_experience-common.toml` —— 服务端 / 世界机制。小节：`[double_jump]`、`[elytra_flight]`、`[step_assist]`、`[item_cleanup]`、`[enchanted_golden_apple]`、`[flat_bedrock]`、`[extended_gamma]`、`[saturation]`、`[ocean_blessing]`、`[chunk_devourer]`
+- `config/better_experience-common.toml` —— 服务端 / 世界机制。小节：`[double_jump]`、`[elytra_flight]`、`[step_assist]`、`[item_cleanup]`、`[enchanted_golden_apple]`、`[flat_bedrock]`、`[world_height]`、`[extended_gamma]`、`[saturation]`、`[ocean_blessing]`、`[chunk_devourer]`
 - `config/better_experience-client.toml` —— 纯客户端偏好（望远镜的缩放倍数、准星、覆盖层样式等）。小节：`[spyglass]`。其中 `spyglass.spyglassZoom` 是**由游戏写回**的：滚轮调完缩放后会记住，下次启动直接恢复
 
 **每一项功能都有独立的总开关，默认全部开启。** 总开关关闭时该项功能被整体禁用，玩家在游戏内**无法**重新打开。此外还有若干数值可调，例如：
@@ -53,6 +54,7 @@
 - `step_assist.stepAssistMode` / `step_assist.stepAssistStepHeight` / `step_assist.stepAssistSneakHeight` / `step_assist.stepAssistSprintHeight` — 上坡辅助的初始档位与三档高度
 - `item_cleanup.cleanupIntervalSeconds` / `item_cleanup.cleanupWarningSeconds` — 掉落物清理的间隔与预警时间
 - `item_cleanup.cleanupItemBlacklistEnable` 等四个开关 — 黑白名单是否生效，名单本身在数据包里（`data/better_experience/dropped_item_cleanup/`）
+- `world_height.worldHeightEnabled` — 世界高度覆盖的总开关（默认 **关闭**）。**每个维度改成多高写在数据包里，不在这个配置文件里**，见下方「注意事项」
 - `chunk_devourer.chunkDevourerBlocksPerTick` — 区块吞噬者每 tick 最多删多少格（默认 4096）。等级 1 约 3.5 万格、等级 3 约 86 万格，所以默认配置下等级 1 几 tick 完成、等级 3 约 10 秒；调小更平滑、调大更快但更卡
 - `chunk_devourer.chunkDevourerDropsItems` — 被吞噬的方块是否掉落（默认 `false`，纯删除，也不给经验；打开后时运 / 精准采集照常生效，但一次会刷出海量掉落物）
 - `chunk_devourer.chunkDevourerToolCost` — 工具代价，默认 `DESTROY_TOOL`（一把镐换一次，**无视耐久附魔**——否则耐久 III 有 3/4 概率豁免掉那点损耗，镐子不碎而是停在只剩 1 点耐久），可改成 `SINGLE_DURABILITY`（整次只扣 1 点，走原版损耗，耐久附魔可豁免）。**创造模式两种都不消耗耐久**（与原版一致）
@@ -66,6 +68,15 @@
 ## 注意事项
 
 - **平坦基岩只影响新生成的区块。** 已经生成过的区块不会改变。
+- **世界高度覆盖**（`world_height.worldHeightEnabled`，默认**关闭**）：按维度改写世界的可用高度范围。**具体数值写在数据包里而不是配置文件里** —— 扫描 `data/<任意命名空间>/world_height/*.json`，格式是顶层数组：`[ { "dimension": "minecraft:overworld", "min_y": -64, "height": 512 } ]`
+  - `dimension` 填**维度类型**的 ID（原版三个是 `minecraft:overworld` / `minecraft:the_nether` / `minecraft:the_end`；模组维度看它的 `dimension_type` 文件名）。注意是维度**类型**，不是存档里到处用的那个维度 ID —— 原版两者同名，所以平时看不出区别
+  - `min_y` 是世界底部，**可省略**，省略时保持该维度原本的值
+  - `height` 是**世界总高度**而不是上限坐标 —— 原版主世界是 `min_y = -64` / `height = 384`（即 -64..319），想让它变成 -64..511 就写 `min_y = -64` / `height = 512`
+  - 允许范围：高度 16–4096 且必须是 16 的倍数；`min_y` 必须是 16 的倍数且不低于 -4096，并且 `min_y + height` 不超过 4096。**卡这个范围是为了挡住手滑写错的数量级**：区块是按 `高度 / 16` 个段实打实分配数组的，高度真填成天文数字会让每个区块凭空申请上百万个段，直接 OOM。不合法或超范围的条目会被忽略并在日志里说明原因，该维度保持原样
+  - 模组自带一份模板 `data/better_experience/world_height/heights.json`（内容就是原版三维度的原值，只作格式示例）。**要真正生效请另建数据包**：在存档目录下建 `datapacks/你的包/pack.mcmeta` 和 `datapacks/你的包/data/你的命名空间/world_height/任意名.json`。模组自带的模板永远排在最前，所以你的文件一定覆盖它；同一个维度被多个文件写到时会打一条冲突日志
+- **世界高度只改变可用空间，不改变地形生成范围。** 地形由数据包的 `noise_settings` 决定，本模组不动它（原版密度函数按绝对 Y 取值，挪动 `noise_settings` 会得到不可预期的地形）。所以调高上限 = 多出可以建造的空气，调低下限 = 世界底部多出一层空腔，而不是凭空长出新地形。高度改小时原版自己会做裁剪，地形被裁掉，不会越界崩服
+- **世界高度只对未生成过区块的新世界有效。** 区块存档里的段是按当时的高度写下去的，高度一变就对不上号（高度图长度、段索引全错位），已生成过区块的世界会读不出来甚至**损坏**。改动前务必备份
+- 世界高度是**数据驱动**的，所以连**没装本模组的客户端**也能正确显示（服务端在登录包里把覆盖后的维度类型发下去了）
 - **亮度扩展**：滑块（或「调整亮度」热键）任何时候都能把值调到 1000%，但功能关闭时按原版亮度渲染（即"能调，不生效"）。设置值会被记住，开关来回切不会影响它。
 - **Sodium / Rubidium / Embeddium 的界面里，亮度滑块仍是 0–100%**：本模组不修改任何界面类，所以在那几个视频设置界面里滑块拿不到 1000%——**调值请用「调整亮度」热键（按住 + 滚轮）**，它在任何环境下都能用。原版视频设置界面的滑块不受影响（仍是 0–1000%）。
 - 之所以不去放宽那几个界面的滑块上限：曾有一版这么做（用 ASM 改写 Sodium 系界面类里滑块上限的常量），实测在 Embeddium 0.3.31 下会让**视频设置界面完全打不开**——点击有按压动画、随后无任何反应，且无异常、无日志。该兼容层现已整层移除。

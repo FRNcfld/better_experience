@@ -1,0 +1,5 @@
+[
+  { "dimension": "minecraft:overworld", "min_y": -64, "height": 384 },
+  { "dimension": "minecraft:the_nether", "min_y": 0, "height": 256 },
+  { "dimension": "minecraft:the_end", "min_y": 0, "height": 256 }
+]

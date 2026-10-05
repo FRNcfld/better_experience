@@ -19,7 +19,8 @@
         "SaturationFoodDataMixin",
         "ThrownTridentAccessor",
         "ThrownTridentMixin",
-        "TridentItemMixin"
+        "TridentItemMixin",
+        "WorldHeightMixin"
     ],
     "client": [
         "GammaLightTextureMixin",

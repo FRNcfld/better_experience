@@ -20,8 +20,8 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
  * push 之前挂着的 {@code comment()} 会成为 TOML 里该小节的标题注释。
  * 新增配置项时按所属小节就近插入即可；新增小节则在它开头补 pop、结尾补 push。
  *
- * <p>本类按功能分 10 个小节：{@code [double_jump]}、{@code [elytra_flight]}、{@code [step_assist]}、
- * {@code [item_cleanup]}、{@code [enchanted_golden_apple]}、{@code [flat_bedrock]}、
+ * <p>本类按功能分 11 个小节：{@code [double_jump]}、{@code [elytra_flight]}、{@code [step_assist]}、
+ * {@code [item_cleanup]}、{@code [enchanted_golden_apple]}、{@code [flat_bedrock]}、{@code [world_height]}、
  * {@code [extended_gamma]}、{@code [saturation]}、{@code [ocean_blessing]}、{@code [chunk_devourer]}。
  * 每个功能的总开关都是该小节的第一项。
  *
@@ -171,6 +171,29 @@ public class BetterExperienceServerConfig
             .comment("主世界底部与下界顶 / 底是否只生成 1 层基岩, 取代原版 1-5 层的锯齿状",
                      "只影响新生成的区块, 已生成过的区块不会改变")
             .define("flatBedrockEnabled", true);
+
+    // ==================== 世界高度覆盖 ====================
+    static
+    {
+        BUILDER.pop().comment("世界高度覆盖: 按维度改写世界的可用高度范围 (数据包驱动)").push("world_height");
+    }
+
+    private static final ForgeConfigSpec.BooleanValue WORLD_HEIGHT_ENABLED = BUILDER
+            .comment("世界高度覆盖的总开关",
+                     "具体每个维度改成多高写在数据包里: data/<任意命名空间>/world_height/*.json",
+                     "格式 (顶层是数组; dimension 填维度类型 ID, 原版三个是 minecraft:overworld / the_nether / the_end):",
+                     "  [ { \"dimension\": \"minecraft:overworld\", \"min_y\": -64, \"height\": 512 } ]",
+                     "min_y 可省略, 省略时保持该维度原本的世界底部;",
+                     "height 是世界总高度而不是上限坐标 —— 原版主世界是 min_y = -64 / height = 384 (即 -64..319),",
+                     "想让它变成 -64..511 就写 min_y = -64 / height = 512",
+                     "本模组允许的范围: 高度 16..4096 且必须是 16 的倍数; min_y 必须是 16 的倍数且不低于 -4096,",
+                     "并且 min_y + height 不超过 4096 (卡这个范围是为了挡住手滑写错的数量级: 区块是按 高度/16 个段分配数组的)",
+                     "注意一: 只改变可用的高度范围, 不改变地形生成范围 (地形由数据包的 noise_settings 决定)。",
+                     "  调高上限 = 多出可以建造的空气, 调低下限 = 世界底部多出一层空腔, 而不是凭空长出新地形",
+                     "注意二: 只对**新世界**有效。已经生成过区块的世界改了高度会让区块数据与高度对不上号,",
+                     "  存档会读不出来甚至损坏 —— 改动前务必备份",
+                     "关闭本项时完全不读数据包, 也不改任何维度")
+            .define("worldHeightEnabled", false);
 
     // ==================== 亮度扩展 ====================
     static
@@ -351,6 +374,10 @@ public class BetterExperienceServerConfig
     // 两者都早于配置加载完成, 所以初值必须与配置文件默认值一致, 不能依赖 onLoad
     public static boolean flatBedrockEnabled = true;
 
+    // ---- 世界高度覆盖 ----
+    // 在数据包注册表加载时被读 (那时配置早已加载完), 初值同样与配置文件默认值保持一致
+    public static boolean worldHeightEnabled = false;
+
     // ---- 亮度扩展 ----
     public static boolean extendedGammaEnabled = true;
 
@@ -410,6 +437,7 @@ public class BetterExperienceServerConfig
         cleanupDimensionBlacklistEnable = CLEANUP_DIMENSION_BLACKLIST_ENABLE.get();
         enchantedGoldenAppleBuffEnabled = ENCHANTED_GOLDEN_APPLE_BUFF_ENABLED.get();
         flatBedrockEnabled = FLAT_BEDROCK_ENABLED.get();
+        worldHeightEnabled = WORLD_HEIGHT_ENABLED.get();
         extendedGammaEnabled = EXTENDED_GAMMA_ENABLED.get();
         saturationEnabled = SATURATION_ENABLED.get();
         saturationAlwaysHungry = SATURATION_ALWAYS_HUNGRY.get();
