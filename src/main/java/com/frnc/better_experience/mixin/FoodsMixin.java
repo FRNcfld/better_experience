@@ -36,6 +36,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * 先后顺序取决于 Forge 内部调度, 不可依赖。这里只做两件事: 把原版值快照下来, 然后无条件装上
  * 强化版; 真正的取舍推迟到 {@link ItemMixin} 在"取用食物属性"那一刻进行。
  *
+ * <p><strong>关掉开关能回退到什么程度</strong>: 只回退"取用食物属性"这一条路径。
+ * {@link ItemMixin} 拦的是 {@code Item#getFoodProperties()}, 而它是原版与 Forge 取食物属性的唯一入口
+ * ({@code ItemStack#getFoodProperties} 最终也落到这里), 所以物品在游戏里的表现与判定 —— 能不能吃、
+ * 吃下去给什么 —— 都回到原版。但<strong>静态字段本身仍是强化版</strong>, 而且 {@code Items} 初始化时
+ * 已经把它烙进了 {@code Item} 自己的 {@code foodProperties} 字段: 任何<em>绕过</em>
+ * {@code getFoodProperties()} 直接读这两处的第三方代码, 无论开关如何拿到的都是强化值。
+ * 这是"改原版静态量"这一手法的固有代价, 换成不碰静态量的做法 (例如连 {@code Items} 的构造一起替换)
+ * 与别的模组冲突只会更多, 因此维持现状。
+ *
  * <p>注意: 这里<strong>必须重写整个 FoodProperties</strong>——原版把四项效果都写在
  * {@code Foods.<clinit>} 里, 而普通金苹果与附魔金苹果用的是同一个
  * {@code new MobEffectInstance(MobEffects.REGENERATION, ...)} 调用点,

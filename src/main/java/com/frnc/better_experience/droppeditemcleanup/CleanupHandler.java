@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -80,6 +81,23 @@ public class CleanupHandler
                 startCleanup(server);
             }
         }
+    }
+
+    /**
+     * 服务器停下时清空清理状态。
+     *
+     * <p>理由与 {@code ChunkDevourerQueue} 的清理相同, 但这里不清的后果更重:
+     * {@code pendingItems} 里攥着的是上一批 {@link ItemEntity} 的<strong>强引用</strong>,
+     * 连它们所属的 {@code ServerLevel} 都会因此无法回收; 而 {@code cleaning} 仍是 true,
+     * 于是新世界一开服就会对着那些早已作废的实体调 {@code isAlive()} / {@code discard()},
+     * 同时新世界自己的定时清理被一直拖着不开始。
+     */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event)
+    {
+        cleaning = false;
+        pendingItems.clear();
+        elapsedTicks = 0;
     }
 
     /** 启动一次清理: 收集受维度过滤的掉落物 */

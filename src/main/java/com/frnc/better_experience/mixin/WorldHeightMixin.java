@@ -3,7 +3,6 @@ package com.frnc.better_experience.mixin;
 import com.frnc.better_experience.worldheight.WorldHeightOverrides;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Holder;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryDataLoader;
@@ -13,7 +12,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
@@ -29,7 +28,7 @@ import java.util.Map;
  * <ol>
  *   <li>{@code @Inject HEAD} —— 轮到维度类型这张注册表时, 就地用它的 {@link ResourceManager} 读本模组的数据包覆盖文件。
  *       加载器自带 {@code ResourceManager} 参数, 不用另找; 也只有在这里读才来得及 (见下)。</li>
- *   <li>{@code @Redirect} 注册调用 —— 把要注册进去的 {@code DimensionType} 换成覆盖后的。</li>
+ *   <li>{@code @ModifyArg} 注册调用 —— 把要注册进去的 {@code DimensionType} 换成覆盖后的。</li>
  * </ol>
  *
  * <p><strong>为什么不用 {@code AddReloadListenerEvent} 那套</strong>: 世界加载的顺序是
@@ -71,19 +70,24 @@ public abstract class WorldHeightMixin
     /**
      * 注册每一条时套一层覆盖。
      *
-     * <p>处理器用裸类型 (raw type) 是为了让擦除后的签名与目标调用
-     * {@code WritableRegistry#register(ResourceKey, Object, Lifecycle) -> Holder$Reference} 逐一对应 ——
-     * Mixin 按擦除后的描述符比对, 泛型变量反而容易在这里出岔子。
+     * <p><strong>为什么用 {@code @ModifyArg} 而不是 {@code @Redirect}</strong>: {@code @Redirect} 是
+     * <em>排他</em>的 —— 同一处调用被两个模组重定向时, Mixin 只保留 priority 大的那个, 另一个被整个跳过,
+     * 日志里只留一行 {@code conflict. Skipping ... already redirected by ...}。<strong>静默失效</strong>比报错更难查。
+     * 而 {@code RegistryDataLoader#loadRegistryContents} 是<em>所有</em>模组的数据包注册表 (维度类型、生物群系、
+     * 结构……) 都要经过的路径, 撞车的概率不低; {@code @ModifyArg} 可以叠加, 多个模组各改一次依次传递。
+     *
+     * <p>处理器写成"消费被调用方法<em>自身</em>的全部实参"的形式, 因为查覆盖表要用到 {@code key}。
+     * {@code @ModifyArg} 拿不到<em>外层</em>方法 ({@code loadRegistryContents}) 的参数, 但这里也不需要 ——
+     * 数据包已经由上面那个 {@code @Inject HEAD} 读完了。
      *
      * <p>被注册的对象绝大多数都不是维度类型 (生物群系、结构、伤害类型……), {@link WorldHeightOverrides#apply}
      * 的第一句就会原样返回, 所以这次包装的开销可以忽略。
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Redirect(method = "loadRegistryContents", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/core/WritableRegistry;register(Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/core/Holder$Reference;"))
-    private static Holder.Reference betterExperience$applyWorldHeight(
-            WritableRegistry registry, ResourceKey key, Object value, Lifecycle lifecycle)
+    @ModifyArg(method = "loadRegistryContents", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/core/WritableRegistry;register(Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/core/Holder$Reference;"),
+            index = 1)
+    private static <E> E betterExperience$applyWorldHeight(ResourceKey<E> key, E value, Lifecycle lifecycle)
     {
-        return registry.register(key, WorldHeightOverrides.apply(key, value), lifecycle);
+        return WorldHeightOverrides.apply(key, value);
     }
 }

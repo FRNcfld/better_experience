@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
@@ -88,6 +89,19 @@ public class ElytraFlightHandler
     public static void setClientEnabled(boolean enabled)
     {
         clientEnabled = enabled;
+    }
+
+    /**
+     * 服务器停下时清空静态表。
+     *
+     * <p>与 {@code ChunkDevourerQueue} / {@code JumpHandler} 的处理同理: 静态状态不该跨存档继承 ——
+     * 否则上个存档里"关掉了鞘翅飞行"的玩家进新存档时会被认领, 带着一个他这次从没设过的状态开局。
+     * 玩家<strong>登出</strong>时则刻意不清: 那是他在游戏内按出来的偏好, 断线重连应当保持。
+     */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event)
+    {
+        enabledByPlayer.clear();
     }
 
     /** 玩家登录时同步当前开关状态给客户端, 避免断线重连后客户端停留在旧状态 */

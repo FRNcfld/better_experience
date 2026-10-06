@@ -11,6 +11,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
@@ -99,6 +100,32 @@ public class JumpHandler
             DoubleJumpNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
                     new DoubleJumpStatePacket(isDoubleJumpEnabled(serverPlayer)));
         }
+    }
+
+    /**
+     * 玩家退出时清掉他这次腾空的计数。
+     *
+     * <p>这是纯粹的临时状态 (落地就会归零), 人走了留着没有意义, 不清则会随历史玩家数一直长。
+     * 注意<strong>开关本身 ({@link #enabledByPlayer}) 刻意不清</strong>: 那是玩家在游戏内按出来的偏好,
+     * 断线重连应当保持, 与"不写配置文件"的既有约定一致; 它只在关服时归零 (见 {@link #onServerStopped})。
+     */
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event)
+    {
+        jumpCounts.remove(event.getEntity().getUUID());
+    }
+
+    /**
+     * 服务器停下时清空两张静态表。
+     *
+     * <p>理由与 {@code ChunkDevourerQueue} 的清理相同: 这些表是静态的, 而玩家 UUID 跨存档跨重启都一样 ——
+     * 不清的话, 上个存档里"关掉了二段跳"的玩家进新存档时会被认领, 带着一个他这次从没设过的状态开局。
+     */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event)
+    {
+        enabledByPlayer.clear();
+        jumpCounts.clear();
     }
 
     /** 落地时重置跳跃次数 (END 阶段, 避免在 LivingFallEvent 之前重置导致削减失效) */

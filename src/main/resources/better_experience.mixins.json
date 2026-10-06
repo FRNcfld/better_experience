@@ -20,7 +20,8 @@
         "ThrownTridentAccessor",
         "ThrownTridentMixin",
         "TridentItemMixin",
-        "WorldHeightMixin"
+        "WorldHeightMixin",
+        "compat.StepHeightCompatMixin"
     ],
     "client": [
         "GammaLightTextureMixin",
