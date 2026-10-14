@@ -17,8 +17,12 @@ import net.minecraft.util.Mth;
  * <ul>
  *   <li>滑块任何时候都能拖到 1000%（取值集合恒为 0–10, 见 {@link ExtendedGammaValueSet}）, 与开关无关;</li>
  *   <li>拖出来的值原样存进 options.txt, 开关来回切不会改动它, 所以重启后依然是玩家设的那个值;</li>
- *   <li>真正生效的亮度由 {@link #effectiveGamma(double)} 决定: 开关打开时用设置值, 关闭时按原版
- *       （即压到原版上限 100%）表现。</li>
+ *   <li>真正生效的亮度由 {@link #effectiveGamma(double)} 决定: 开关打开时用设置值,
+ *       关闭时回到 {@link #baselineGamma()} —— 玩家最后一次设定的原版范围内亮度,
+ *       <strong>而不是</strong>把存储值压到 100%（那种做法在存储值已经是 1000% 时等于顶到最亮）;</li>
+ *   <li>关闭期间「调整亮度」热键也不放行 (见 {@code gamma/client/KeyInputHandler}):
+ *       "关了还能调"会让玩家以为自己没关成功。滑块本身不受影响 —— 那属于原版界面, 本方管不到,
+ *       而且改的只是存储值, 关着的时候不参与渲染。</li>
  * </ul>
  *
  * <p>生效亮度的拦截点是 {@code LightTexture#updateLightTexture}——那是原版<strong>唯一把
@@ -30,7 +34,8 @@ import net.minecraft.util.Mth;
  * <p>与其他功能的热键开关一致: 状态是会话级的, 热键切换只改内存态, 不写回配置文件。
  *
  * <p><strong>「按住热键 + 滚轮」调值</strong>走 {@link #step(double, double)}: 它只算新值、只改存储值,
- * 与拖动滑块完全等价 (同样不碰开关)。这条入口不依赖任何界面, 所以 Sodium / Rubidium / Embeddium
+ * 与拖动滑块完全等价 (同样不碰开关)。<strong>开关关闭时这条入口整体不放行</strong> (由调用方提前返回)。
+ * 这条入口不依赖任何界面, 所以 Sodium / Rubidium / Embeddium
  * 的视频设置界面也能用 —— 那些界面里的滑块上限仍是 0–100%, 热键是那里唯一能调到 1000% 的途径。
  *
  * <p><strong>不要再为了"让那些界面的滑块也能拖到 1000%"去改写 Sodium 系的界面类。</strong>
@@ -54,6 +59,20 @@ public final class ExtendedGamma
     public static final double SCROLL_STEP = 0.1D;
 
     private static boolean enabled = BetterExperienceServerConfig.extendedGammaEnabled;
+
+    /** 「关掉扩展后回退到哪个亮度」还没被校准过时的兜底值 —— 原版 {@code Options.gamma} 的构造初值 */
+    private static final double FALLBACK_BASELINE = 0.5D;
+
+    /**
+     * 「关掉扩展后应该回到的亮度」, 即玩家最后一次设定的<strong>原版范围内</strong>的值。
+     *
+     * <p>为什么不是 {@code min(stored, 1.0)}: 存储值被热键调到 10.0 之后, {@code min(10.0, 1.0) = 1.0} ——
+     * 而 <strong>1.0 恰好是原版最亮</strong>。于是"关掉扩展"这个动作反而把画面顶到最亮, 看起来就像开关没作用。
+     * 玩家真正期望的是"回到我开扩展之前用的那个亮度", 所以这里记的是那个值。
+     *
+     * <p>由 {@link #syncBaseline(double)} 在每帧校准, 详见 {@link #effectiveGamma(double)}。
+     */
+    private static double vanillaBaseline = FALLBACK_BASELINE;
 
     private ExtendedGamma()
     {
@@ -91,11 +110,43 @@ public final class ExtendedGamma
     /**
      * 实际用于渲染的亮度值。存储值不受影响, 所以开关来回切不会丢玩家设置。
      *
-     * @param stored 滑块上设置的值 (0.0–10.0)
-     * @return 开关打开时原样返回; 关闭时压到原版上限 (即原版滑块拉满的表现)
+     * <p>基准<strong>每帧都跟着存储值走</strong> (只要它落在原版范围内), 关闭时给的是基准而不是存储值本身:
+     * <ul>
+     *   <li>玩家用原版滑块调到 0.8 → 基准跟着变成 0.8 → 之后关掉扩展回到的就是 0.8;</li>
+     *   <li>存储值被热键调到 10.0 (超出原版范围) → 基准不动 → 关掉扩展回到的是那之前的值,
+     *       而不是被顶到 1.0 最亮;</li>
+     *   <li>扩展<strong>一直关着</strong>时也要能校准, 所以同步放在开关判断<em>之前</em> ——
+     *       否则关闭状态下的早退会让基准永远停在 {@link #FALLBACK_BASELINE},
+     *       把玩家自己拖出来的 0.8 也一并吃掉。</li>
+     * </ul>
+     *
+     * @param stored 滑块上设置的值 (0.0–{@link ExtendedGammaValueSet#MAX_GAMMA})
+     * @return 开关打开时原样返回; 关闭时返回 {@link #baselineGamma()}
      */
     public static double effectiveGamma(double stored)
     {
-        return enabled ? stored : Math.min(stored, VANILLA_MAX_GAMMA);
+        syncBaseline(stored);
+        return enabled ? stored : vanillaBaseline;
+    }
+
+    /** 关掉扩展后<strong>实际生效</strong>的亮度 (供切换热键回显, 让玩家知道画面接下来是什么亮度) */
+    public static double baselineGamma()
+    {
+        return vanillaBaseline;
+    }
+
+    /**
+     * 用存储值校准基准, 但<strong>只接受原版范围内的值</strong>。
+     *
+     * <p>超过 100% 的存储值代表的是"扩展开着时"的亮度, 拿它当"关掉后要回到的亮度"就违背了这个功能的语义 ——
+     * 而且那个值在原版管线下本来就会被继续拉亮 (光照管线里的 lerp 权重并不封顶, 只有最终颜色被钳到 1.0),
+     * 回退到它等于没回退。
+     */
+    private static void syncBaseline(double stored)
+    {
+        if (stored >= 0.0D && stored <= VANILLA_MAX_GAMMA)
+        {
+            vanillaBaseline = stored;
+        }
     }
 }

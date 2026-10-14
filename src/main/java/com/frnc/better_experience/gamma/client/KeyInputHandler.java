@@ -35,10 +35,14 @@ public class KeyInputHandler
         if (!ClientHandler.TOGGLE_KEY.consumeClick()) return;
 
         boolean enabled = ExtendedGamma.toggle();
+
+        // 从开到关时回显"现在实际生效的亮度": 只报一句"已关闭"的话, 玩家看着仍然很亮的画面
+        // 会以为关失败了 —— 实际生效的是回退后的基准值, 而这个值通常既不是存储值也不是 0
         mc.player.displayClientMessage(
                 Component.translatable(enabled
                                 ? "message.better_experience.extended_gamma.enabled"
-                                : "message.better_experience.extended_gamma.disabled")
+                                : "message.better_experience.extended_gamma.disabled",
+                        Math.round(ExtendedGamma.baselineGamma() * 100.0D))
                         .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED),
                 true);
     }
@@ -55,8 +59,10 @@ public class KeyInputHandler
      * 开镜时望远镜的 mixin 在方法最前面就 cancel 了, 所以那条路径不受影响 (开镜时滚轮仍是缩放)。
      *
      * <p>改的是 {@code Options.gamma} 里那个<strong>存储值</strong> (与滑块同一个来源, 不另立一份),
-     * 因此照常写进 options.txt、重启后仍在。生效与否仍由 {@link ExtendedGamma} 的开关决定 ——
-     * 这里是"改值", 不是"改开关": 开关关着时照样能改, 只是回显会点明它此刻不生效。
+     * 因此照常写进 options.txt、重启后仍在。这里是"改值", 不是"改开关"。
+     *
+     * <p><strong>开关关闭时本入口整体不放行</strong>: 那时改的值不参与渲染, 玩家对着一个没有任何画面反馈的
+     * 滚轮调半天只会更困惑, 还会以为自己没关成功。要调值请先用切换热键把扩展打开。
      */
     @SubscribeEvent
     public static void onMouseScroll(InputEvent.MouseScrollingEvent event)
@@ -64,6 +70,10 @@ public class KeyInputHandler
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         if (!ClientHandler.ADJUST_KEY.isDown()) return;
+
+        // 关闭时直接返回。刻意不 cancel —— 让滚轮照常切快捷栏,
+        // 否则关掉扩展后按住调整键滚轮会变成什么都不发生
+        if (!ExtendedGamma.isEnabled()) return;
 
         double scrollDelta = event.getScrollDelta();
         if (scrollDelta == 0.0D) return;
@@ -76,13 +86,10 @@ public class KeyInputHandler
         double updated = ExtendedGamma.step(gamma.get(), notches);
         gamma.set(updated);
 
-        boolean enabled = ExtendedGamma.isEnabled();
+        // 走到这里开关一定是开着的 (关闭时上面已经返回), 所以不必再分支
         mc.player.displayClientMessage(
-                Component.translatable(enabled
-                                ? "message.better_experience.extended_gamma.value"
-                                : "message.better_experience.extended_gamma.value.disabled",
-                        Math.round(updated * 100.0D))
-                        .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED),
+                Component.translatable("message.better_experience.extended_gamma.value",
+                        Math.round(updated * 100.0D)).withStyle(ChatFormatting.GREEN),
                 true);
 
         event.setCanceled(true);
